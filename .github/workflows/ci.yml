@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend (ruff + pytest + schema)
+    runs-on: ubuntu-24.04
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: guda_dev
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      DJANGO_SECRET_KEY: ci-only-secret-key
+      DB_NAME: guda_dev
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      REDIS_URL: redis://127.0.0.1:6379/0
+      CELERY_BROKER_URL: redis://127.0.0.1:6379/1
+      CELERY_RESULT_BACKEND: redis://127.0.0.1:6379/2
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安装 mysqlclient 编译依赖
+        run: sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev pkg-config
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: 安装依赖（锁定版本）
+        run: uv sync --frozen
+      - name: Ruff 静态检查
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: 迁移一致性
+        run: uv run python manage.py makemigrations --check --dry-run
+      - name: OpenAPI 契约校验
+        run: uv run python manage.py spectacular --file /tmp/schema.yaml --validate
+      - name: 单元测试与覆盖率
+        run: |
+          uv run coverage run -m pytest
+          uv run coverage report
+
+  frontend:
+    name: frontend (eslint + tsc + vitest + build)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: 安装依赖（锁定版本）
+        run: pnpm install --frozen-lockfile
+      - name: ESLint
+        run: pnpm run lint
+      - name: 类型检查
+        run: pnpm run type-check
+      - name: 单元测试
+        run: pnpm run test
+      - name: 生产构建
+        run: pnpm run build

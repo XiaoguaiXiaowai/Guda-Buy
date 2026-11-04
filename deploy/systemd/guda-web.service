@@ -1,0 +1,22 @@
+[Unit]
+Description=GUDA Django Web (Gunicorn)
+After=network.target mariadb.service redis-server.service
+Requires=mariadb.service redis-server.service
+
+[Service]
+Type=notify
+User=guda
+Group=guda
+WorkingDirectory=/srv/guda/app/backend
+EnvironmentFile=/srv/guda/env/.env
+ExecStart=/srv/guda/app/backend/.venv/bin/gunicorn config.wsgi:application -c /srv/guda/app/deploy/gunicorn/gunicorn.conf.py
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=3
+RuntimeDirectory=guda
+RuntimeDirectoryMode=0755
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

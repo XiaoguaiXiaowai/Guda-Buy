@@ -1,0 +1,32 @@
+:root {
+  --guda-primary: #1f6feb;
+  --guda-primary-soft: #e8f0fe;
+  --guda-text: #1f2328;
+  --guda-text-muted: #6b7280;
+  --guda-border: #e5e7eb;
+  --guda-surface: #ffffff;
+  --guda-bg: #f7f8fa;
+  --guda-success: #15803d;
+  --guda-danger: #b91c1c;
+  --guda-radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--guda-bg);
+  color: var(--guda-text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}

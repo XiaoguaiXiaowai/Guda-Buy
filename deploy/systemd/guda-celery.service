@@ -1,0 +1,19 @@
+[Unit]
+Description=GUDA Celery Worker
+After=network.target mariadb.service redis-server.service
+Requires=mariadb.service redis-server.service
+
+[Service]
+Type=simple
+User=guda
+Group=guda
+WorkingDirectory=/srv/guda/app/backend
+EnvironmentFile=/srv/guda/env/.env
+ExecStart=/srv/guda/app/backend/.venv/bin/celery -A config worker -l info --concurrency=2
+Restart=always
+RestartSec=5
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
