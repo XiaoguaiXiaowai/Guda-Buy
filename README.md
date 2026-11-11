@@ -18,6 +18,17 @@ docs/               迭代计划、开发文档
 
 ## 本地开发（macOS）
 
+### 一键启动 / 停止（推荐）
+
+```bash
+./scripts/dev-start.sh   # 启动后端 8000 + 前端 5173，并做健康检查
+./scripts/dev-stop.sh    # 停止脚本启动的全部进程
+```
+
+- 进程 PID 与日志保存在 `.dev/`（已 gitignore）：`.dev/backend.log`、`.dev/frontend.log`。
+- 重复执行 `dev-start.sh` 会跳过已在运行的服务；端口被其他进程占用时会提示并退出。
+- 首次使用仍需完成下面的依赖安装与 `.env` 配置（脚本会检查并给出提示）。
+
 ### 1. 准备服务
 
 ```bash
