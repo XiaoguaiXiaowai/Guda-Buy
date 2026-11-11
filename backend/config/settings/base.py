@@ -1,5 +1,6 @@
 """公共配置：所有环境共享，环境相关差异放在 dev/prod/test。"""
 
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -26,8 +27,10 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_filters",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "apps.common",
+    "apps.accounts",
 ]
 
 MIDDLEWARE = [
@@ -98,7 +101,16 @@ CACHES = {
         "LOCATION": REDIS_URL,
         "KEY_PREFIX": REDIS_KEY_PREFIX,
         "TIMEOUT": 300,
-    }
+    },
+    # 验证码、限流、锁定计数等易失数据（Redis DB3，架构文档 3.6）
+    "security": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": env.str(
+            "REDIS_SECURITY_URL", default=f"{REDIS_URL.rsplit('/', 1)[0]}/3"
+        ),
+        "KEY_PREFIX": REDIS_KEY_PREFIX,
+        "TIMEOUT": 300,
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -118,7 +130,9 @@ CELERY_TASK_ALWAYS_EAGER = False
 # DRF / OpenAPI
 # ---------------------------------------------------------------------------
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "apps.common.pagination.StandardPagination",
     "PAGE_SIZE": 20,
@@ -137,6 +151,9 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "60/min",
         "user": "600/min",
+        "login": "5/min",
+        "register": "3/min",
+        "email_code": "3/min",
     },
     "UNAUTHENTICATED_USER": None,
 }
@@ -151,8 +168,17 @@ SPECTACULAR_SETTINGS = {
 }
 
 # ---------------------------------------------------------------------------
-# 认证 / 密码
+# 认证 / 密码 / JWT
 # ---------------------------------------------------------------------------
+AUTH_USER_MODEL = "accounts.User"
+
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
@@ -162,6 +188,29 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env.int("JWT_ACCESS_MINUTES", default=30)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=env.int("JWT_REFRESH_DAYS", default=7)),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": False,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# refresh 走 HttpOnly Cookie（架构文档 3.7）
+AUTH_REFRESH_COOKIE_NAME = "refresh"
+AUTH_REFRESH_COOKIE_PATH = "/api/v1/auth/"
+AUTH_REFRESH_COOKIE_SECURE = not DEBUG
+
+# 账号安全参数
+AUTH_LOGIN_MAX_FAILURES = 5
+AUTH_LOGIN_LOCK_MINUTES = 15
+AUTH_EMAIL_CODE_TTL_SECONDS = 300
+AUTH_EMAIL_CODE_RESEND_SECONDS = 60
+AUTH_EMAIL_CODE_MAX_FAILURES = 5
+AUTH_EMAIL_CODE_DAILY_LIMIT = 10
+AUTH_PASSWORD_RESET_TTL_SECONDS = 1800
 
 # ---------------------------------------------------------------------------
 # 国际化 / 静态资源

@@ -2,7 +2,14 @@
 
 GUDA 商城演示项目。技术栈：Django 5.2 + DRF + MariaDB + Redis + Celery；Vue 3 + Vite + TypeScript + Pinia + Element Plus。
 
-当前进度：迭代 I0 工程基线。
+当前进度：迭代 I1 会员账号体系（REVIEW，待交叉验收）。
+
+I1 已交付：
+
+- 邮箱验证码注册、登录锁定保护、找回密码
+- JWT access（内存）+ HttpOnly refresh Cookie 轮换与黑名单
+- 个人资料、头像上传、收货地址 CRUD 与默认地址
+- 前端登录/注册/个人中心/地址页与路由守卫、401 静默刷新
 
 ## 目录结构
 
@@ -51,6 +58,7 @@ cd backend
 cp .env.example .env          # 按本机数据库账号修改 DB_USER/DB_PASSWORD/DB_HOST
 uv sync
 uv run python manage.py migrate
+uv run python manage.py init_roles     # 初始化 customer/support/operator/admin 角色组
 uv run python manage.py runserver 127.0.0.1:8000
 ```
 

@@ -8,11 +8,11 @@ const healthLoading = ref(true)
 const healthFailed = ref(false)
 
 const baselineItems = [
-  '统一响应体与五类异常结构',
-  'X-Request-ID 与 JSON 结构化日志',
-  '/healthz/ 依赖探活（DB + Redis）',
-  'OpenAPI 契约与 Swagger UI',
-  'Vue 3 + TS + Pinia + Router + Axios 骨架',
+  '邮箱验证码注册与登录锁定保护',
+  'JWT 访问令牌 + HttpOnly Refresh 轮换',
+  '个人信息、头像上传与资料修改',
+  '收货地址增删改查与默认地址',
+  '未登录拦截与页面刷新后静默恢复登录',
 ]
 
 onMounted(async () => {
@@ -30,9 +30,9 @@ onMounted(async () => {
   <section class="home">
     <div class="home__hero">
       <p class="home__eyebrow">GUDA 在线电商网站</p>
-      <h1 class="home__title">工程基线就绪</h1>
+      <h1 class="home__title">会员账号体系就绪</h1>
       <p class="home__desc">
-        迭代 I0 已搭建前端与后端的最小可运行骨架，后续商品、购物车、订单与支付能力将在此之上叠加。
+        迭代 I1 已交付注册登录、JWT 静默刷新、个人资料与收货地址管理，后续商品、购物车与订单能力将在此之上叠加。
       </p>
     </div>
 
@@ -60,7 +60,7 @@ onMounted(async () => {
       <div class="home__card">
         <h2 class="home__card-title">下一步</h2>
         <p class="home__desc home__desc--small">
-          迭代 I1 将交付会员账号体系：注册登录、JWT 刷新、地址管理与个人中心。当前页面会在该迭代接入真实导航与登录入口。
+          迭代 I2 将交付商品目录与检索：分类树、商品列表/详情、SKU 与库存展示。点击右上角登录或注册即可体验会员功能。
         </p>
       </div>
     </div>

@@ -1,5 +1,19 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const auth = useAuthStore()
+
+async function handleAccountCommand(command: string) {
+  if (command === 'logout') {
+    await auth.logout()
+    await router.push('/')
+    return
+  }
+  await router.push(command)
+}
 </script>
 
 <template>
@@ -11,9 +25,33 @@ import { RouterView } from 'vue-router'
           <RouterLink to="/">首页</RouterLink>
           <span class="front-layout__nav-disabled">商品</span>
           <span class="front-layout__nav-disabled">购物车</span>
-          <span class="front-layout__nav-disabled">我的</span>
+          <RouterLink to="/user/profile">我的</RouterLink>
         </nav>
-        <span class="front-layout__badge">I0 工程基线</span>
+
+        <el-dropdown
+          v-if="auth.isAuthenticated"
+          class="front-layout__account"
+          @command="handleAccountCommand"
+        >
+          <span class="front-layout__user">
+            <el-avatar :size="28" :src="auth.user?.avatar ?? undefined">
+              {{ auth.user?.nickname?.slice(0, 1) ?? 'G' }}
+            </el-avatar>
+            <span class="front-layout__nickname">{{ auth.user?.nickname }}</span>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="/user/profile">个人资料</el-dropdown-item>
+              <el-dropdown-item command="/user/addresses">收货地址</el-dropdown-item>
+              <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+
+        <div v-else class="front-layout__guest">
+          <RouterLink class="front-layout__login" to="/login">登录</RouterLink>
+          <RouterLink class="front-layout__register" to="/register">注册</RouterLink>
+        </div>
       </div>
     </header>
 
@@ -70,7 +108,8 @@ import { RouterView } from 'vue-router'
       color: var(--guda-text);
       text-decoration: none;
 
-      &:hover {
+      &:hover,
+      &.router-link-active {
         color: var(--guda-primary);
       }
     }
@@ -81,13 +120,49 @@ import { RouterView } from 'vue-router'
     cursor: not-allowed;
   }
 
-  &__badge {
+  &__account {
     margin-left: auto;
-    font-size: 12px;
-    color: var(--guda-primary);
-    background: var(--guda-primary-soft);
-    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    outline: none;
+  }
+
+  &__nickname {
+    font-size: 14px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__guest {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+  }
+
+  &__login {
+    color: var(--guda-text);
+    text-decoration: none;
+  }
+
+  &__register {
+    color: #fff;
+    background: var(--guda-primary);
+    padding: 6px 14px;
     border-radius: 999px;
+    text-decoration: none;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
 
   &__main {

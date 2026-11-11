@@ -1,8 +1,16 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 
-import { useAuthStore } from '@/stores/auth'
+import {
+  getAccessToken,
+  refreshAccessToken,
+  setAccessToken,
+} from '@/api/authToken'
 import type { ApiError } from '@/types/api'
+
+interface RetryConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+}
 
 const http = axios.create({
   baseURL: '/api/v1',
@@ -10,23 +18,36 @@ const http = axios.create({
 })
 
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const auth = useAuthStore()
-  if (auth.accessToken) {
-    config.headers.Authorization = `Bearer ${auth.accessToken}`
+  const token = getAccessToken()
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
   }
   // 配合后端 Cookie 刷新接口的 CSRF 兜底校验
   config.headers['X-Requested-With'] = 'XMLHttpRequest'
   return config
 })
 
+function shouldTryRefresh(url: string | undefined): boolean {
+  return !url?.startsWith('/auth/')
+}
+
 http.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiError>) => {
+  async (error: AxiosError<ApiError>) => {
     const status = error.response?.status
+    const config = error.config as RetryConfig | undefined
 
-    if (status === 401) {
-      // I1 接入 refresh 轮换：此处预留「静默刷新并重放一次」的位置
-      useAuthStore().clear()
+    if (status === 401 && config && !config._retry && shouldTryRefresh(config.url)) {
+      config._retry = true
+      const refreshed = await refreshAccessToken()
+      if (refreshed) {
+        const token = getAccessToken()
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+        }
+        return http(config)
+      }
+      setAccessToken(null)
     }
 
     const message =

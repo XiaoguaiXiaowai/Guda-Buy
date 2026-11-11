@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.permissions import AllowAny
 
@@ -19,7 +19,7 @@ urlpatterns += [
         name="swagger-ui",
     ),
     path("api/v1/", api_root, name="api-root"),
-    # 业务路由在后续迭代接入，统一挂载到 /api/v1/
+    path("api/v1/", include("apps.accounts.urls")),
 ]
 
 handler404 = "apps.common.exceptions.not_found_handler"
