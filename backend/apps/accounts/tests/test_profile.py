@@ -207,3 +207,103 @@ def test_address_validation(auth_client):
         format="json",
     )
     assert response.status_code == 400
+
+
+ADDRESS_PAYLOAD = {
+    "receiver_name": "测试",
+    "phone": "13600136000",
+    "province": "浙江省",
+    "city": "杭州市",
+    "district": "西湖区",
+    "detail": "文三路 1 号",
+}
+
+
+def test_update_address_switches_and_keeps_default(user):
+    first = services.create_address(user, dict(ADDRESS_PAYLOAD))
+    second = services.create_address(user, dict(ADDRESS_PAYLOAD))
+
+    services.update_address(user, second.public_id, {**ADDRESS_PAYLOAD, "is_default": True})
+    first.refresh_from_db()
+    second.refresh_from_db()
+    assert second.is_default is True
+    assert first.is_default is False
+
+    # 唯一默认地址不允许被取消，避免出现无默认地址
+    services.update_address(user, second.public_id, {**ADDRESS_PAYLOAD, "is_default": False})
+    second.refresh_from_db()
+    assert second.is_default is True
+
+
+def test_address_service_returns_404_for_missing(user):
+    with pytest.raises(BusinessError):
+        services.update_address(user, "missing", dict(ADDRESS_PAYLOAD))
+    with pytest.raises(BusinessError):
+        services.set_default_address(user, "missing")
+    with pytest.raises(BusinessError):
+        services.delete_address(user, "missing")
+
+
+def test_avatar_rejects_wrong_mime_and_oversize(auth_client, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+
+    wrong_mime = auth_client.post(
+        AVATAR_URL,
+        {"file": SimpleUploadedFile("avatar.png", _png_bytes(), content_type="image/gif")},
+        format="multipart",
+    )
+    assert wrong_mime.status_code == 400
+
+    too_large = auth_client.post(
+        AVATAR_URL,
+        {
+            "file": SimpleUploadedFile(
+                "avatar.png",
+                b"0" * (services.AVATAR_MAX_BYTES + 1),
+                content_type="image/png",
+            )
+        },
+        format="multipart",
+    )
+    assert too_large.status_code == 400
+
+
+def test_avatar_rejects_corrupt_and_oversized_image(auth_client, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+
+    corrupt = auth_client.post(
+        AVATAR_URL,
+        {"file": SimpleUploadedFile("avatar.png", b"not-an-image", content_type="image/png")},
+        format="multipart",
+    )
+    assert corrupt.status_code == 400
+
+    buffer = io.BytesIO()
+    Image.new("RGB", (services.AVATAR_MAX_SIDE + 1, 2), color=(0, 0, 0)).save(buffer, format="PNG")
+    oversized = auth_client.post(
+        AVATAR_URL,
+        {"file": SimpleUploadedFile("avatar.png", buffer.getvalue(), content_type="image/png")},
+        format="multipart",
+    )
+    assert oversized.status_code == 400
+
+
+def test_replacing_avatar_removes_previous_file(auth_client, user, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+
+    for index in range(2):
+        response = auth_client.post(
+            AVATAR_URL,
+            {
+                "file": SimpleUploadedFile(
+                    f"avatar{index}.png", _png_bytes(), content_type="image/png"
+                )
+            },
+            format="multipart",
+        )
+        assert response.status_code == 200
+
+    user.refresh_from_db()
+    stored = list((tmp_path / "avatars").iterdir())
+    assert len(stored) == 1
+    assert stored[0].name == user.avatar.split("/")[-1]

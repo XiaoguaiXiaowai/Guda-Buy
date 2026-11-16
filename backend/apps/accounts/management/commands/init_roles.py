@@ -62,8 +62,7 @@ class Command(BaseCommand):
                     (
                         perm
                         for perm in all_permissions
-                        if perm.content_type.app_label == app_label
-                        and perm.codename == codename
+                        if perm.content_type.app_label == app_label and perm.codename == codename
                     ),
                     None,
                 )

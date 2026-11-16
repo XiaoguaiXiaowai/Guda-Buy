@@ -1,6 +1,6 @@
 import pytest
-from django.core.cache import caches
 from django.core import mail
+from django.core.cache import caches
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User

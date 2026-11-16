@@ -7,6 +7,7 @@ from django.test import override_settings
 
 from apps.accounts import services
 from apps.accounts.models import User
+from apps.common.exceptions import BusinessError
 
 pytestmark = pytest.mark.django_db
 
@@ -232,3 +233,87 @@ def test_register_validates_password_strength(client):
 
     assert response.status_code == 400
     assert response.json()["code"] == "COMMON_VALIDATION_ERROR"
+
+
+def test_send_email_code_respects_daily_limit():
+    email = "daily@guda.test"
+    caches["security"].set(f"auth:code_daily:{email}", 10, timeout=3600)
+
+    with pytest.raises(BusinessError) as exc:
+        services.send_email_code(email)
+    assert exc.value.code == "AUTH_CODE_TOO_FREQUENT"
+
+
+def test_email_code_invalidated_after_five_failures():
+    email = "brute@guda.test"
+    services.send_email_code(email)
+    code = _code_of(email)
+    wrong = "000000" if code != "000000" else "111111"
+
+    for _ in range(5):
+        with pytest.raises(BusinessError):
+            services.verify_email_code(email, wrong)
+
+    assert _code_of(email) is None
+
+
+def test_register_duplicate_username_returns_409(client, user):
+    services.send_email_code("uniq@guda.test")
+    response = client.post(
+        REGISTER_URL,
+        {
+            "email": "uniq@guda.test",
+            "username": "GUDA_USER",
+            "password": "Passw0rd123",
+            "email_code": _code_of("uniq@guda.test"),
+        },
+        format="json",
+    )
+
+    assert response.status_code == 409
+    assert response.json()["code"] == "USER_USERNAME_EXISTS"
+
+
+def test_register_service_rejects_weak_password():
+    with pytest.raises(BusinessError):
+        services.register_user(
+            email="a@guda.test", username="a_user", password="ab1", email_code="000000"
+        )
+
+    with pytest.raises(BusinessError):
+        services.register_user(
+            email="b@guda.test", username="b_user", password="abcdefgh", email_code="000000"
+        )
+
+
+def test_login_service_locks_after_threshold(user):
+    for _ in range(5):
+        with pytest.raises(BusinessError):
+            services.authenticate_account(user.username, "wrong-pass")
+
+    with pytest.raises(BusinessError) as exc:
+        services.authenticate_account(user.username, "Passw0rd123")
+    assert exc.value.code == "AUTH_ACCOUNT_LOCKED"
+    assert exc.value.http_status == 423
+
+
+def test_login_rejects_inactive_user(user):
+    user.is_active = False
+    user.save(update_fields=["is_active"])
+
+    with pytest.raises(BusinessError) as exc:
+        services.authenticate_account(user.username, "Passw0rd123")
+    assert exc.value.code == "AUTH_ACCOUNT_DISABLED"
+
+
+def test_blacklist_refresh_token_is_idempotent():
+    services.blacklist_refresh_token("not-a-real-token")
+
+
+def test_confirm_password_reset_with_stale_token():
+    token = "stale-token"
+    caches["security"].set(services._reset_key(token), 999999, timeout=300)
+
+    with pytest.raises(BusinessError) as exc:
+        services.confirm_password_reset(token, "Passw0rd123")
+    assert exc.value.code == "AUTH_TOKEN_INVALID"

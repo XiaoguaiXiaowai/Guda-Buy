@@ -26,9 +26,7 @@ class User(AbstractUser):
     )
     email = models.EmailField("邮箱", max_length=254, unique=True)
     nickname = models.CharField("昵称", max_length=30, blank=True, default="")
-    gender = models.CharField(
-        "性别", max_length=16, choices=Gender.choices, default=Gender.UNKNOWN
-    )
+    gender = models.CharField("性别", max_length=16, choices=Gender.choices, default=Gender.UNKNOWN)
     birthday = models.DateField("生日", null=True, blank=True)
     avatar = models.CharField("头像路径", max_length=255, blank=True, default="")
     phone_encrypted = models.CharField("手机号密文", max_length=128, blank=True, default="")

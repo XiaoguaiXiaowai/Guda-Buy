@@ -105,9 +105,7 @@ CACHES = {
     # 验证码、限流、锁定计数等易失数据（Redis DB3，架构文档 3.6）
     "security": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": env.str(
-            "REDIS_SECURITY_URL", default=f"{REDIS_URL.rsplit('/', 1)[0]}/3"
-        ),
+        "LOCATION": env.str("REDIS_SECURITY_URL", default=f"{REDIS_URL.rsplit('/', 1)[0]}/3"),
         "KEY_PREFIX": REDIS_KEY_PREFIX,
         "TIMEOUT": 300,
     },
