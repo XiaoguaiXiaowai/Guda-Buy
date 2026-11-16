@@ -176,9 +176,7 @@ onMounted(() => {
             >
               加入购物车
             </el-button>
-            <span class="product-detail__hint"
-              >库存以 SKU 维度实时展示，下单锁定将在 I3 接入。</span
-            >
+            <span class="product-detail__hint">库存以 SKU 维度实时展示，下单锁定将在 I3 接入。</span>
           </div>
         </div>
       </div>

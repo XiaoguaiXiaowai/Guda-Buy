@@ -501,9 +501,9 @@ onMounted(async () => {
       </el-form>
       <template #footer>
         <el-button @click="stockDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="stockSaving" @click="submitStockAdjust"
-          >确认调整</el-button
-        >
+        <el-button type="primary" :loading="stockSaving" @click="submitStockAdjust">
+          确认调整
+        </el-button>
       </template>
     </el-dialog>
   </section>
