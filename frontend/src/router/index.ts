@@ -35,6 +35,24 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '重置密码' },
   },
   {
+    path: '/products',
+    name: 'product-list',
+    component: () => import('@/views/front/ProductListView.vue'),
+    meta: { title: '商品' },
+  },
+  {
+    path: '/category/:publicId',
+    name: 'category-products',
+    component: () => import('@/views/front/ProductListView.vue'),
+    meta: { title: '分类商品' },
+  },
+  {
+    path: '/product/:publicId',
+    name: 'product-detail',
+    component: () => import('@/views/front/ProductDetailView.vue'),
+    meta: { title: '商品详情' },
+  },
+  {
     path: '/user',
     redirect: '/user/profile',
   },
@@ -49,6 +67,34 @@ const routes: RouteRecordRaw[] = [
     name: 'user-addresses',
     component: () => import('@/views/user/AddressListView.vue'),
     meta: { title: '收货地址', requiresAuth: true },
+  },
+  {
+    path: '/admin',
+    redirect: '/admin/products',
+  },
+  {
+    path: '/admin/categories',
+    name: 'admin-categories',
+    component: () => import('@/views/admin/AdminCategoryView.vue'),
+    meta: { title: '分类管理', requiresAuth: true, requiresCatalogAdmin: true },
+  },
+  {
+    path: '/admin/products',
+    name: 'admin-products',
+    component: () => import('@/views/admin/AdminProductListView.vue'),
+    meta: { title: '商品管理', requiresAuth: true, requiresCatalogAdmin: true },
+  },
+  {
+    path: '/admin/products/new',
+    name: 'admin-product-create',
+    component: () => import('@/views/admin/AdminProductEditView.vue'),
+    meta: { title: '新建商品', requiresAuth: true, requiresCatalogAdmin: true },
+  },
+  {
+    path: '/admin/products/:publicId/edit',
+    name: 'admin-product-edit',
+    component: () => import('@/views/admin/AdminProductEditView.vue'),
+    meta: { title: '编辑商品', requiresAuth: true, requiresCatalogAdmin: true },
   },
   {
     path: '/:pathMatch(.*)*',
@@ -76,6 +122,10 @@ router.beforeEach(async (to) => {
 
   if (to.meta.guestOnly && auth.isAuthenticated) {
     return { name: 'user-profile' }
+  }
+
+  if (to.meta.requiresCatalogAdmin && !auth.isCatalogStaff) {
+    return { name: 'home' }
   }
 
   return true

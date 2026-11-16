@@ -20,6 +20,7 @@ urlpatterns += [
     ),
     path("api/v1/", api_root, name="api-root"),
     path("api/v1/", include("apps.accounts.urls")),
+    path("api/v1/", include("apps.catalog.urls")),
 ]
 
 handler404 = "apps.common.exceptions.not_found_handler"

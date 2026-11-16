@@ -72,6 +72,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
     gender_label = serializers.CharField(source="get_gender_display", read_only=True)
+    roles = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -84,9 +85,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "gender_label",
             "birthday",
             "avatar",
+            "roles",
             "created_at",
         ]
         read_only_fields = ["public_id", "username", "email", "created_at"]
+
+    def get_roles(self, obj) -> list[str]:
+        return sorted(obj.groups.values_list("name", flat=True))
 
     def get_avatar(self, obj) -> str | None:
         if not obj.avatar:

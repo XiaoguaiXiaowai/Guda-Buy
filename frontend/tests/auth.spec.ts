@@ -27,6 +27,7 @@ const profile: UserProfile = {
   gender_label: '保密',
   birthday: null,
   avatar: null,
+  roles: ['customer'],
   created_at: '2026-11-11T10:00:00+08:00',
 }
 

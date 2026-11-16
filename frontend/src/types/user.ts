@@ -9,6 +9,7 @@ export interface UserProfile {
   gender_label: string
   birthday: string | null
   avatar: string | null
+  roles: string[]
   created_at: string
 }
 

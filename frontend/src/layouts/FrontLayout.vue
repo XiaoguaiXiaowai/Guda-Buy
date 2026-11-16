@@ -23,7 +23,7 @@ async function handleAccountCommand(command: string) {
         <RouterLink class="front-layout__brand" to="/">GUDA</RouterLink>
         <nav class="front-layout__nav" aria-label="主导航">
           <RouterLink to="/">首页</RouterLink>
-          <span class="front-layout__nav-disabled">商品</span>
+          <RouterLink to="/products">商品</RouterLink>
           <span class="front-layout__nav-disabled">购物车</span>
           <RouterLink to="/user/profile">我的</RouterLink>
         </nav>
@@ -43,6 +43,9 @@ async function handleAccountCommand(command: string) {
             <el-dropdown-menu>
               <el-dropdown-item command="/user/profile">个人资料</el-dropdown-item>
               <el-dropdown-item command="/user/addresses">收货地址</el-dropdown-item>
+              <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/products" divided>
+                商品后台
+              </el-dropdown-item>
               <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>

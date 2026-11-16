@@ -8,11 +8,10 @@ const healthLoading = ref(true)
 const healthFailed = ref(false)
 
 const baselineItems = [
-  '邮箱验证码注册与登录锁定保护',
-  'JWT 访问令牌 + HttpOnly Refresh 轮换',
-  '个人信息、头像上传与资料修改',
-  '收货地址增删改查与默认地址',
-  '未登录拦截与页面刷新后静默恢复登录',
+  '会员注册登录、JWT 静默刷新与资料地址管理（I1）',
+  '两级分类树与商品列表筛选/排序/搜索联想（I2）',
+  '商品详情、SKU 规格选择与库存状态展示（I2）',
+  '运营后台分类、商品、SKU 与增量库存管理（I2）',
 ]
 
 onMounted(async () => {
@@ -30,10 +29,15 @@ onMounted(async () => {
   <section class="home">
     <div class="home__hero">
       <p class="home__eyebrow">GUDA 在线电商网站</p>
-      <h1 class="home__title">会员账号体系就绪</h1>
+      <h1 class="home__title">商品目录已上线</h1>
       <p class="home__desc">
-        迭代 I1 已交付注册登录、JWT 静默刷新、个人资料与收货地址管理，后续商品、购物车与订单能力将在此之上叠加。
+        迭代 I2 已交付分类树、商品列表与详情、SKU
+        规格与库存展示，运营可在后台维护分类、商品与库存流水。
       </p>
+      <div class="home__cta">
+        <RouterLink class="home__cta-primary" to="/products">浏览商品</RouterLink>
+        <RouterLink class="home__cta-link" to="/user/profile">进入我的</RouterLink>
+      </div>
     </div>
 
     <div class="home__grid">
@@ -60,7 +64,8 @@ onMounted(async () => {
       <div class="home__card">
         <h2 class="home__card-title">下一步</h2>
         <p class="home__desc home__desc--small">
-          迭代 I2 将交付商品目录与检索：分类树、商品列表/详情、SKU 与库存展示。点击右上角登录或注册即可体验会员功能。
+          迭代 I3
+          将交付购物车与下单流程：加购、库存锁定、订单创建与超时取消。运营账号可在右上角菜单进入商品后台。
         </p>
       </div>
     </div>
@@ -94,6 +99,34 @@ onMounted(async () => {
 
     &--small {
       font-size: 14px;
+    }
+  }
+
+  &__cta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 22px;
+    font-size: 14px;
+  }
+
+  &__cta-primary {
+    background: var(--guda-primary);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  &__cta-link {
+    color: var(--guda-text);
+
+    &:hover {
+      color: var(--guda-primary);
     }
   }
 

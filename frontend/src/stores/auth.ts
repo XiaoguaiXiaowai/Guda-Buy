@@ -16,6 +16,10 @@ const SESSION_HINT_KEY = 'guda.session'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserProfile | null>(null)
   const isAuthenticated = computed(() => user.value !== null)
+  const isCatalogStaff = computed(() => {
+    const roles = user.value?.roles ?? []
+    return roles.includes('admin') || roles.includes('operator')
+  })
   let refreshPromise: Promise<boolean> | null = null
 
   function applySession(payload: AuthResponse) {
@@ -115,6 +119,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user,
     isAuthenticated,
+    isCatalogStaff,
     ensureSession,
     restoreOnBoot,
     setProfile,

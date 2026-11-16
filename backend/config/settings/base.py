@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.common",
     "apps.accounts",
+    "apps.catalog",
 ]
 
 MIDDLEWARE = [
@@ -278,6 +279,13 @@ LOGGING = {
 # ---------------------------------------------------------------------------
 APP_ORDER_TIMEOUT_MINUTES = env.int("APP_ORDER_TIMEOUT_MINUTES", default=30)
 APP_SITE_URL = env.str("APP_SITE_URL", default="http://localhost:5173")
+
+# 商品中心（架构文档 10.2 / 3.6）
+CATALOG_PRODUCT_CACHE_SECONDS = env.int("CATALOG_PRODUCT_CACHE_SECONDS", default=600)
+CATALOG_CATEGORY_CACHE_SECONDS = env.int("CATALOG_CATEGORY_CACHE_SECONDS", default=3600)
+CATALOG_LOW_STOCK_THRESHOLD = env.int("CATALOG_LOW_STOCK_THRESHOLD", default=5)
+CATALOG_SUGGEST_LIMIT = env.int("CATALOG_SUGGEST_LIMIT", default=10)
+
 PAYMENT_CALLBACK_SECRET = env.str("PAYMENT_CALLBACK_SECRET", default="")
 FIELD_ENCRYPTION_KEY = env.str("FIELD_ENCRYPTION_KEY", default="")
 JWT_ACCESS_MINUTES = env.int("JWT_ACCESS_MINUTES", default=30)
