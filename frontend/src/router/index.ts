@@ -53,6 +53,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '商品详情' },
   },
   {
+    path: '/page/:slug',
+    name: 'cms-page',
+    component: () => import('@/views/front/CmsPageView.vue'),
+    meta: { title: '内容页' },
+  },
+  {
     path: '/user',
     redirect: '/user/profile',
   },
@@ -97,6 +103,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '编辑商品', requiresAuth: true, requiresCatalogAdmin: true },
   },
   {
+    path: '/admin/cms',
+    name: 'admin-cms',
+    component: () => import('@/views/admin/AdminCmsView.vue'),
+    meta: { title: '内容运营', requiresAuth: true, requiresCmsAdmin: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/front/NotFoundView.vue'),
@@ -124,7 +136,7 @@ router.beforeEach(async (to) => {
     return { name: 'user-profile' }
   }
 
-  if (to.meta.requiresCatalogAdmin && !auth.isCatalogStaff) {
+  if ((to.meta.requiresCatalogAdmin || to.meta.requiresCmsAdmin) && !auth.isCatalogStaff) {
     return { name: 'home' }
   }
 

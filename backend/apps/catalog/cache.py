@@ -35,6 +35,11 @@ def bump_product_version() -> None:
     _bump(PRODUCT_VERSION_KEY)
 
 
+def product_version() -> int:
+    """供首页聚合等跨模块缓存 key 组合使用。"""
+    return _version(PRODUCT_VERSION_KEY)
+
+
 def category_tree_key() -> str:
     return CATEGORY_TREE_KEY.format(version=_version(CATEGORY_TREE_VERSION_KEY))
 

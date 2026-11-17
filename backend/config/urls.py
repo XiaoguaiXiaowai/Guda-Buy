@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -21,7 +23,12 @@ urlpatterns += [
     path("api/v1/", api_root, name="api-root"),
     path("api/v1/", include("apps.accounts.urls")),
     path("api/v1/", include("apps.catalog.urls")),
+    path("api/v1/", include("apps.cms.urls")),
 ]
 
 handler404 = "apps.common.exceptions.not_found_handler"
 handler500 = "apps.common.exceptions.server_error_handler"
+
+# 开发环境由 Django 直出 media；生产环境由 Nginx alias /srv/guda/media/ 提供
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

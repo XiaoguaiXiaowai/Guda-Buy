@@ -46,6 +46,9 @@ async function handleAccountCommand(command: string) {
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/products" divided>
                 商品后台
               </el-dropdown-item>
+              <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/cms">
+                内容后台
+              </el-dropdown-item>
               <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
