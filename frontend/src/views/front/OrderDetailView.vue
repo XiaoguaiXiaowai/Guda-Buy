@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { cancelOrder, confirmOrder, fetchOrderDetail } from '@/api/order'
 import type { OrderDetail } from '@/types/order'
@@ -10,6 +10,7 @@ import { formatCurrency, formatDateTime } from '@/utils/format'
 import { orderStatusLabel, orderStatusTone } from '@/utils/order'
 
 const route = useRoute()
+const router = useRouter()
 const orderNo = computed(() => String(route.params.orderNo ?? ''))
 
 const order = ref<OrderDetail | null>(null)
@@ -36,7 +37,7 @@ async function pay(): Promise<void> {
   if (!order.value) {
     return
   }
-  ElMessage.info(`订单 ${order.value.order_no} 的支付功能将在 I6 开放`)
+  await router.push({ name: 'payment', params: { orderNo: order.value.order_no } })
 }
 
 async function cancel(): Promise<void> {

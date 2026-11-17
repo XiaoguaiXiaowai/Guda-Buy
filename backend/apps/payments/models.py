@@ -30,9 +30,7 @@ class Payment(BaseModel):
         "支付渠道", max_length=16, choices=Channel.choices, default=Channel.ALIPAY_MOCK
     )
     amount = models.DecimalField("支付金额", max_digits=12, decimal_places=2)
-    status = models.CharField(
-        "状态", max_length=16, choices=Status.choices, default=Status.PENDING
-    )
+    status = models.CharField("状态", max_length=16, choices=Status.choices, default=Status.PENDING)
     paid_at = models.DateTimeField("支付成功时间", null=True, blank=True)
     callback_payload = models.JSONField("回调原文", null=True, blank=True)
     transaction_ref = models.CharField("第三方流水号", max_length=64, blank=True, default="")

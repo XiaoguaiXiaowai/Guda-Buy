@@ -80,9 +80,7 @@ def test_ship_validates_tracking_no(operator_client, user, address, sku):
     order = build_order(user, address, sku, status=Order.Status.PAID)
 
     missing = operator_client.post(_ship_url(order.order_no), {}, format="json")
-    invalid = operator_client.post(
-        _ship_url(order.order_no), {"tracking_no": "ab"}, format="json"
-    )
+    invalid = operator_client.post(_ship_url(order.order_no), {"tracking_no": "ab"}, format="json")
 
     assert missing.status_code == 400
     assert invalid.status_code == 400

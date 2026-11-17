@@ -16,6 +16,7 @@ from apps.catalog import cache as catalog_cache
 from apps.catalog.models import Product, Sku
 from apps.common.exceptions import BusinessError
 from apps.orders.models import Order, OrderItem, OrderStatusLog
+from apps.payments import services as payment_services
 from apps.payments.models import Payment
 
 UNFINISHED_STATUSES = (
@@ -169,11 +170,6 @@ def _generate_order_no() -> str:
     return "GD" + timezone.localtime().strftime("%Y%m%d%H%M%S") + f"{secrets.randbelow(10000):04d}"
 
 
-def _generate_payment_no() -> str:
-    suffix = f"{secrets.randbelow(1_000_000):06d}"
-    return "PAY" + timezone.localtime().strftime("%Y%m%d%H%M%S") + suffix
-
-
 def create_order(
     user,
     *,
@@ -294,7 +290,7 @@ def _create_order_atomic(
         remark="创建订单",
     )
     Payment.objects.create(
-        payment_no=_generate_payment_no(),
+        payment_no=payment_services.generate_payment_no(order.order_no),
         order=order,
         amount=order.payable_amount,
         status=Payment.Status.PENDING,

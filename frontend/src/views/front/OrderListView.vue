@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import { cancelOrder, confirmOrder, fetchOrders } from '@/api/order'
 import type { OrderBrief, OrderStatus } from '@/types/order'
@@ -9,6 +9,7 @@ import { resolveImageUrl } from '@/utils/catalog'
 import { formatCurrency, formatDateTime } from '@/utils/format'
 import { ORDER_STATUS_TABS, orderStatusLabel, orderStatusTone } from '@/utils/order'
 
+const router = useRouter()
 const orders = ref<OrderBrief[]>([])
 const total = ref(0)
 const page = ref(1)
@@ -52,7 +53,7 @@ function changePage(value: number): void {
 }
 
 async function pay(order: OrderBrief): Promise<void> {
-  ElMessage.info(`订单 ${order.order_no} 的支付功能将在 I6 开放`)
+  await router.push({ name: 'payment', params: { orderNo: order.order_no } })
 }
 
 async function cancel(order: OrderBrief): Promise<void> {

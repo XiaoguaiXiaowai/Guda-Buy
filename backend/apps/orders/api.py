@@ -46,9 +46,8 @@ def _idempotency_key(request) -> str:
 
 
 def _fetch_order(order_no: str, *, user=None) -> Order:
-    queryset = (
-        Order.objects.select_related("user")
-        .prefetch_related("items__sku", "payments", "status_logs")
+    queryset = Order.objects.select_related("user").prefetch_related(
+        "items__sku", "payments", "status_logs"
     )
     if user is not None:
         queryset = queryset.filter(user=user)
@@ -120,9 +119,7 @@ class OrderListCreateView(generics.GenericAPIView):
         )
         order = _fetch_order(order.order_no, user=request.user)
         payload = selectors.order_detail(order)
-        return Response(
-            payload, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        )
+        return Response(payload, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 
 class OrderDetailView(APIView):

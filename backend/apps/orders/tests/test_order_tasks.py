@@ -12,9 +12,7 @@ from apps.payments.models import Payment
 
 
 def _expire(order):
-    Order.objects.filter(pk=order.pk).update(
-        pay_expires_at=timezone.now() - timedelta(minutes=1)
-    )
+    Order.objects.filter(pk=order.pk).update(pay_expires_at=timezone.now() - timedelta(minutes=1))
 
 
 def test_cancel_timeout_orders_cancels_and_releases(user, address, sku):
@@ -69,9 +67,7 @@ def test_cancel_timeout_counts_eager_delay_result(user, address, sku):
     assert result.get() == 1
 
 
-def test_cancel_timeout_continues_when_single_order_fails(
-    monkeypatch, user, address, sku
-):
+def test_cancel_timeout_continues_when_single_order_fails(monkeypatch, user, address, sku):
     monkeypatch.setattr(
         services,
         "cancel_timeout_order",

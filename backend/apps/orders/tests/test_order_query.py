@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from apps.catalog.models import Product
 from apps.orders.models import Order
-from apps.orders.tests.conftest import build_order, make_cart_item, make_sku
+from apps.orders.tests.conftest import build_order, make_sku
 from apps.payments.models import Payment
 
 ORDERS_URL = "/api/v1/orders/"
@@ -180,9 +180,7 @@ def test_confirm_cannot_confirm_other_users_order(auth_client, other_user, addre
     assert response.status_code == 404
 
 
-def test_address_referenced_by_unfinished_order_cannot_be_deleted(
-    auth_client, user, address, sku
-):
+def test_address_referenced_by_unfinished_order_cannot_be_deleted(auth_client, user, address, sku):
     order = build_order(user, address, sku, status=Order.Status.PENDING_PAYMENT)
 
     blocked = auth_client.delete(f"/api/v1/users/me/addresses/{address.public_id}/")
