@@ -4,17 +4,22 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { fetchProduct, fetchRelatedProducts } from '@/api/catalog'
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import type { ProductDetail, ProductListItem, Sku } from '@/types/catalog'
 import { formatPriceRange, resolveImageUrl, stockTone } from '@/utils/catalog'
 import { formatCurrency } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
+const cart = useCartStore()
 
 const product = ref<ProductDetail | null>(null)
 const related = ref<ProductListItem[]>([])
 const loading = ref(true)
 const notFound = ref(false)
+const adding = ref(false)
 const selectedSkuId = ref('')
 const activeImage = ref('')
 
@@ -62,12 +67,23 @@ function selectSku(sku: Sku) {
   selectedSkuId.value = sku.public_id
 }
 
-function addToCart() {
+async function addToCart() {
   if (!selectedSku.value || selectedSku.value.stock <= 0) {
     ElMessage.warning('请选择有库存的规格')
     return
   }
-  ElMessage.info('购物车将在迭代 I3 交付')
+  if (!auth.isAuthenticated) {
+    ElMessage.warning('请先登录后加入购物车')
+    await router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+  adding.value = true
+  try {
+    await cart.addItem(selectedSku.value.public_id)
+    ElMessage.success('已加入购物车')
+  } finally {
+    adding.value = false
+  }
 }
 
 function openProduct(publicId: string) {
@@ -171,12 +187,13 @@ onMounted(() => {
             <el-button
               type="primary"
               size="large"
+              :loading="adding"
               :disabled="!selectedSku || selectedSku.stock <= 0"
               @click="addToCart"
             >
               加入购物车
             </el-button>
-            <span class="product-detail__hint">库存以 SKU 维度实时展示，下单锁定将在 I3 接入。</span>
+            <span class="product-detail__hint">库存以 SKU 维度实时校验，结算与支付将在后续迭代接入。</span>
           </div>
         </div>
       </div>

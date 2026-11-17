@@ -24,6 +24,7 @@ urlpatterns += [
     path("api/v1/", include("apps.accounts.urls")),
     path("api/v1/", include("apps.catalog.urls")),
     path("api/v1/", include("apps.cms.urls")),
+    path("api/v1/", include("apps.cart.urls")),
 ]
 
 handler404 = "apps.common.exceptions.not_found_handler"

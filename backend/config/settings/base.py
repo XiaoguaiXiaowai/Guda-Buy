@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.catalog",
     "apps.cms",
+    "apps.cart",
 ]
 
 MIDDLEWARE = [
@@ -286,6 +287,10 @@ CATALOG_PRODUCT_CACHE_SECONDS = env.int("CATALOG_PRODUCT_CACHE_SECONDS", default
 CATALOG_CATEGORY_CACHE_SECONDS = env.int("CATALOG_CATEGORY_CACHE_SECONDS", default=3600)
 CATALOG_LOW_STOCK_THRESHOLD = env.int("CATALOG_LOW_STOCK_THRESHOLD", default=5)
 CATALOG_SUGGEST_LIMIT = env.int("CATALOG_SUGGEST_LIMIT", default=10)
+
+# 购物车（架构文档 10.3）
+CART_MAX_ITEMS = env.int("CART_MAX_ITEMS", default=50)
+CART_ITEM_MAX_QUANTITY = env.int("CART_ITEM_MAX_QUANTITY", default=99)
 
 # CMS 内容运营（架构文档 10.9 / 3.6）
 CMS_HOME_CACHE_SECONDS = env.int("CMS_HOME_CACHE_SECONDS", default=300)

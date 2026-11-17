@@ -1,19 +1,40 @@
 <script setup lang="ts">
+import { onMounted, watch } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 
 const router = useRouter()
 const auth = useAuthStore()
+const cart = useCartStore()
 
 async function handleAccountCommand(command: string) {
   if (command === 'logout') {
     await auth.logout()
+    cart.reset()
     await router.push('/')
     return
   }
   await router.push(command)
 }
+
+onMounted(() => {
+  if (auth.isAuthenticated) {
+    void cart.refreshCount()
+  }
+})
+
+watch(
+  () => auth.isAuthenticated,
+  (authenticated) => {
+    if (authenticated) {
+      void cart.refreshCount()
+    } else {
+      cart.reset()
+    }
+  },
+)
 </script>
 
 <template>
@@ -24,7 +45,15 @@ async function handleAccountCommand(command: string) {
         <nav class="front-layout__nav" aria-label="主导航">
           <RouterLink to="/">首页</RouterLink>
           <RouterLink to="/products">商品</RouterLink>
-          <span class="front-layout__nav-disabled">购物车</span>
+          <RouterLink to="/cart" class="front-layout__cart">
+            购物车
+            <el-badge
+              v-if="cart.totalQuantity"
+              class="front-layout__badge"
+              :value="cart.totalQuantity"
+              :max="99"
+            />
+          </RouterLink>
           <RouterLink to="/user/profile">我的</RouterLink>
         </nav>
 
@@ -121,9 +150,18 @@ async function handleAccountCommand(command: string) {
     }
   }
 
-  &__nav-disabled {
-    color: var(--guda-text-muted);
-    cursor: not-allowed;
+  &__cart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__badge {
+    line-height: 1;
+
+    :deep(.el-badge__content) {
+      border: none;
+    }
   }
 
   &__account {

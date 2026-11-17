@@ -59,6 +59,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '内容页' },
   },
   {
+    path: '/cart',
+    name: 'cart',
+    component: () => import('@/views/front/CartView.vue'),
+    meta: { title: '购物车', requiresAuth: true },
+  },
+  {
     path: '/user',
     redirect: '/user/profile',
   },
