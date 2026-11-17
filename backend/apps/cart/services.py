@@ -74,11 +74,7 @@ def add_item(user, sku_public_id: str, quantity: int = 1) -> CartItem:
     _ensure_salable(sku)
     _ensure_stock(sku, quantity)
 
-    item = (
-        CartItem.objects.select_for_update()
-        .filter(user=user, sku=sku, is_deleted=False)
-        .first()
-    )
+    item = CartItem.objects.select_for_update().filter(user=user, sku=sku, is_deleted=False).first()
     if item is not None:
         merged = item.quantity + quantity
         if merged > _max_quantity():
@@ -94,10 +90,7 @@ def add_item(user, sku_public_id: str, quantity: int = 1) -> CartItem:
         item.save(update_fields=["quantity", "is_selected", "updated_at"])
         return item
 
-    if (
-        CartItem.objects.filter(user=user, is_deleted=False).count()
-        >= _max_items()
-    ):
+    if CartItem.objects.filter(user=user, is_deleted=False).count() >= _max_items():
         raise BusinessError(
             "CART_ITEM_LIMIT",
             f"购物车最多添加 {_max_items()} 种商品",

@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     "apps.catalog",
     "apps.cms",
     "apps.cart",
+    "apps.orders",
+    "apps.payments",
 ]
 
 MIDDLEWARE = [
@@ -126,6 +128,16 @@ CELERY_TIMEZONE = "Asia/Shanghai"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_TASK_ALWAYS_EAGER = False
+CELERY_BEAT_SCHEDULE = {
+    "orders-cancel-timeout": {
+        "task": "orders.tasks.cancel_timeout_orders",
+        "schedule": 60.0,
+    },
+    "orders-auto-confirm": {
+        "task": "orders.tasks.auto_confirm_orders",
+        "schedule": 3600.0,
+    },
+}
 
 # ---------------------------------------------------------------------------
 # DRF / OpenAPI
@@ -291,6 +303,12 @@ CATALOG_SUGGEST_LIMIT = env.int("CATALOG_SUGGEST_LIMIT", default=10)
 # 购物车（架构文档 10.3）
 CART_MAX_ITEMS = env.int("CART_MAX_ITEMS", default=50)
 CART_ITEM_MAX_QUANTITY = env.int("CART_ITEM_MAX_QUANTITY", default=99)
+
+# 订单（架构文档 10.4）
+ORDER_FREE_SHIPPING_THRESHOLD = env.int("ORDER_FREE_SHIPPING_THRESHOLD", default=99)
+ORDER_SHIPPING_AMOUNT = env.int("ORDER_SHIPPING_AMOUNT", default=10)
+ORDER_AUTO_CONFIRM_DAYS = env.int("ORDER_AUTO_CONFIRM_DAYS", default=15)
+ORDER_BATCH_LIMIT = env.int("ORDER_BATCH_LIMIT", default=100)
 
 # CMS 内容运营（架构文档 10.9 / 3.6）
 CMS_HOME_CACHE_SECONDS = env.int("CMS_HOME_CACHE_SECONDS", default=300)

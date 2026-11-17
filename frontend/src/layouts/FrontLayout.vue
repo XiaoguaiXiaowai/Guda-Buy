@@ -71,6 +71,7 @@ watch(
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="/user/profile">个人资料</el-dropdown-item>
+              <el-dropdown-item command="/user/orders">我的订单</el-dropdown-item>
               <el-dropdown-item command="/user/addresses">收货地址</el-dropdown-item>
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/products" divided>
                 商品后台

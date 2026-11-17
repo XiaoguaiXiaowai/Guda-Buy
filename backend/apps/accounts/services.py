@@ -420,6 +420,21 @@ def delete_address(user, public_id: str) -> None:
         address = Address.objects.filter(user=user, public_id=public_id).first()
         if address is None:
             raise BusinessError("COMMON_NOT_FOUND", "地址不存在", http_status=404)
+        # 未完成订单引用的地址禁止删除（I1-2，随 I5 订单模型接入）
+        from apps.orders.models import Order
+
+        if Order.objects.filter(
+            user=user,
+            address_public_id=public_id,
+            status__in=(
+                Order.Status.PENDING_PAYMENT,
+                Order.Status.PAID,
+                Order.Status.SHIPPED,
+            ),
+        ).exists():
+            raise BusinessError(
+                "USER_ADDRESS_IN_USE", "该地址被未完成订单引用，无法删除", http_status=422
+            )
         was_default = address.is_default
         address.delete()
         if was_default:

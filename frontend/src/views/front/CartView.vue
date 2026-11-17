@@ -110,8 +110,7 @@ function checkout(): void {
     ElMessage.warning('请先勾选有效商品')
     return
   }
-  ElMessage.info('结算与支付将在 I5 交付')
-  void router.push('/products')
+  void router.push('/checkout')
 }
 
 onMounted(() => {
