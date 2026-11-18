@@ -20,6 +20,7 @@ NEW_COMMIT="$(git rev-parse HEAD)"
 echo "[publish] 目标版本：$NEW_COMMIT"
 
 cd "$APP_DIR/backend"
+export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.prod}"
 uv sync --frozen
 uv run python manage.py migrate --noinput
 uv run python manage.py collectstatic --noinput
@@ -34,7 +35,7 @@ sudo systemctl restart guda-web guda-celery guda-celerybeat
 
 echo "[publish] 健康检查：$SMOKE_URL"
 for i in $(seq 1 10); do
-  if curl -fsS --max-time 5 "$SMOKE_URL"; then
+  if curl -fsSL --max-time 5 "$SMOKE_URL"; then
     echo
     echo "[publish] 发布成功：$NEW_COMMIT"
     exit 0

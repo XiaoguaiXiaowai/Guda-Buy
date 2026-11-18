@@ -171,6 +171,10 @@ REST_FRAMEWORK = {
     "UNAUTHENTICATED_USER": None,
 }
 
+# 仅压测环境使用：置 1 时关闭限流，默认不生效
+if env.bool("GUDA_DISABLE_THROTTLE", default=False):
+    REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "GUDA 在线电商网站 API",
     "DESCRIPTION": "GUDA 商城开放接口（OpenAPI 3.0）",

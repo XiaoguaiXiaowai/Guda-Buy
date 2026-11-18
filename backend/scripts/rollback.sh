@@ -20,6 +20,7 @@ git reset --hard "$PREV_COMMIT"
 echo "$CURRENT_COMMIT" > "$PREV_FILE"
 
 cd "$APP_DIR/backend"
+export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.prod}"
 uv sync --frozen
 uv run python manage.py migrate --noinput
 uv run python manage.py collectstatic --noinput
@@ -32,7 +33,7 @@ sudo rsync -a --delete "$APP_DIR/frontend/dist/" /srv/guda/frontend/
 sudo systemctl restart guda-web guda-celery guda-celerybeat
 
 for i in $(seq 1 10); do
-  if curl -fsS --max-time 5 "$SMOKE_URL"; then
+  if curl -fsSL --max-time 5 "$SMOKE_URL"; then
     echo
     echo "[rollback] 回滚成功：$PREV_COMMIT"
     exit 0
