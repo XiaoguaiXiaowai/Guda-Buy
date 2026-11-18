@@ -82,13 +82,31 @@ uv run ruff format --check .
 uv run python manage.py makemigrations --check --dry-run
 uv run python manage.py spectacular --file /tmp/schema.yaml --validate
 uv run coverage run -m pytest && uv run coverage report
+uv run coverage xml -o reports/coverage.xml   # 报告归档用
 
 # 前端
 cd frontend
 pnpm run lint
 pnpm run type-check
-pnpm run test
+pnpm run test          # 或 pnpm run test:report 产出 reports/vitest.xml
 pnpm run build
+```
+
+### 测试报告与冒烟
+
+- 后端 `pytest` 自动产出 JUnit：`backend/reports/pytest.xml`；覆盖率 XML/HTML 用 `uv run coverage xml -o reports/coverage.xml`、`uv run coverage html`。
+- 前端 `pnpm run test:report` 产出 `frontend/reports/vitest.xml`。
+- 迭代关闭时把当次报告复制到仓库根 `reports/<日期>/` 提交归档（示例：`reports/2026-11-18/`）。
+- 冒烟：`backend/scripts/smoke.sh`，5 项核心链路；`publish.sh` / `rollback.sh` 已自动调用。
+
+```bash
+# public 模式（不写数据，可对生产执行）
+SMOKE_BASE_URL=https://192.168.121.126 ./backend/scripts/smoke.sh
+
+# full 模式（会创建 1 笔演示订单并完成模拟支付，仅预发/本地）
+SMOKE_BASE_URL=http://127.0.0.1:8000 \
+  SMOKE_ACCOUNT=smoke@example.com SMOKE_PASSWORD=Smoke12345 \
+  ./backend/scripts/smoke.sh
 ```
 
 ## 端点

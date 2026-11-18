@@ -37,6 +37,13 @@ dist/
 test-results/
 playwright-report/
 .screenshots/.tmp/
+backend/reports/*
+!backend/reports/.gitkeep
+frontend/reports/*
+!frontend/reports/.gitkeep
 
 # 本地开发进程与日志
 .dev/
+
+# 本地工作区数据（会话记忆等，不入库）
+.workbuddy/

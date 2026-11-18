@@ -4,6 +4,7 @@ set -euo pipefail
 
 APP_DIR="${APP_DIR:-/srv/guda/app}"
 SMOKE_URL="${SMOKE_URL:-https://guda.example.com/healthz/}"
+SMOKE_BASE_URL="${SMOKE_BASE_URL:-${SMOKE_URL%%/healthz*}}"
 PREV_FILE="/srv/guda/.last_release"
 
 if [[ ! -f "$PREV_FILE" ]]; then
@@ -32,15 +33,21 @@ sudo rsync -a --delete "$APP_DIR/frontend/dist/" /srv/guda/frontend/
 
 sudo systemctl restart guda-web guda-celery guda-celerybeat
 
-for i in $(seq 1 10); do
-  if curl -fsSL --max-time 5 "$SMOKE_URL"; then
-    echo
-    echo "[rollback] 回滚成功：$PREV_COMMIT"
-    exit 0
+echo "[rollback] 冒烟验证：$SMOKE_BASE_URL（5 项，含健康检查）"
+SMOKE_OK=0
+for i in $(seq 1 3); do
+  if SMOKE_BASE_URL="$SMOKE_BASE_URL" bash "$APP_DIR/backend/scripts/smoke.sh"; then
+    SMOKE_OK=1
+    break
   fi
-  echo "[rollback] 第 $i 次探活失败，3 秒后重试"
-  sleep 3
+  echo "[rollback] 第 $i 次冒烟失败，5 秒后重试"
+  sleep 5
 done
 
-echo "[rollback] 回滚后健康检查仍失败，请立即人工介入" >&2
+if [ "$SMOKE_OK" = "1" ]; then
+  echo "[rollback] 回滚成功：$PREV_COMMIT"
+  exit 0
+fi
+
+echo "[rollback] 回滚后冒烟仍失败，请立即人工介入" >&2
 exit 1

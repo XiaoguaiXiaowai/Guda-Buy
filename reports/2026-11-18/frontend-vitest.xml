@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="33" failures="0" errors="0" time="0.098644584">
+    <testsuite name="tests/auth.spec.ts" timestamp="2026-11-18T09:05:23.389Z" hostname="lijiadeMBP.lan" tests="5" failures="0" errors="0" skipped="0" time="0.012983">
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 登录后仅把 access 放在内存，localStorage 只留会话提示" time="0.007135167">
+        </testcase>
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 刷新页面后用 refresh Cookie 恢复会话" time="0.004023">
+        </testcase>
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; refresh 失效时清除本地登录态且不保留会话提示" time="0.000490333">
+        </testcase>
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 登出时清空用户与令牌" time="0.000296541">
+        </testcase>
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 无会话提示时不发起 refresh 请求" time="0.000302">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/cart.spec.ts" timestamp="2026-11-18T09:05:23.503Z" hostname="lijiadeMBP.lan" tests="5" failures="0" errors="0" skipped="0" time="0.017448625">
+        <testcase classname="tests/cart.spec.ts" name="cartStatusTone / cartStatusLabel &gt; 按状态映射标签色与文案" time="0.000892334">
+        </testcase>
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 未登录时清零角标" time="0.005858125">
+        </testcase>
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 登录后刷新角标并计算 hasItems" time="0.000514125">
+        </testcase>
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 加购成功后同步刷新角标" time="0.001118875">
+        </testcase>
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 接口失败时清零" time="0.000307583">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/catalog.spec.ts" timestamp="2026-11-18T09:05:23.508Z" hostname="lijiadeMBP.lan" tests="9" failures="0" errors="0" skipped="0" time="0.028831417">
+        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 相对路径补齐 /media 前缀" time="0.00077075">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 绝对地址原样返回" time="0.000225833">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 空值返回空字符串" time="0.000082125">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 同价展示单价" time="0.025433833">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 不同价展示起售价" time="0.000165542">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 未定价给出占位" time="0.000077667">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="stockTone &gt; 按库存状态映射标签色" time="0.000151875">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="productStatusLabel &gt; 返回中文状态" time="0.000073209">
+        </testcase>
+        <testcase classname="tests/catalog.spec.ts" name="toQueryParams &gt; 过滤空值与空字符串" time="0.000647666">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/cms.spec.ts" timestamp="2026-11-18T09:05:23.515Z" hostname="lijiadeMBP.lan" tests="10" failures="0" errors="0" skipped="0" time="0.004510583">
+        <testcase classname="tests/cms.spec.ts" name="cmsPageStatusLabel / tone &gt; 映射页面状态中文与标签色" time="0.0010005">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="sectionStatusLabel / position / level &gt; 映射栏目、位置与公告级别" time="0.000375583">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 无起止时间为长期展示" time="0.000432542">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 未到开始时间为未开始" time="0.000079625">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 处于窗口内为展示中" time="0.000047958">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 超过结束时间为已结束" time="0.000110917">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 窗口文案与标签色保持一致" time="0.0007125">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 接受小写字母、数字与中划线" time="0.000229792">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 拒绝中文、空格与首尾中划线" time="0.000241">
+        </testcase>
+        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 大写会被归一化后接受" time="0.000066166">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/format.spec.ts" timestamp="2026-11-18T09:05:23.524Z" hostname="lijiadeMBP.lan" tests="4" failures="0" errors="0" skipped="0" time="0.034870959">
+        <testcase classname="tests/format.spec.ts" name="formatCurrency &gt; 保留两位小数并添加千分位" time="0.029361167">
+        </testcase>
+        <testcase classname="tests/format.spec.ts" name="formatCurrency &gt; 非法金额回退为 0.00" time="0.000222375">
+        </testcase>
+        <testcase classname="tests/format.spec.ts" name="formatDateTime &gt; 空值展示占位符" time="0.000149709">
+        </testcase>
+        <testcase classname="tests/format.spec.ts" name="formatDateTime &gt; 有效时间可格式化" time="0.004472">
+        </testcase>
+    </testsuite>
+</testsuites>

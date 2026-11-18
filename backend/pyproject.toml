@@ -53,7 +53,7 @@ quote-style = "double"
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py"]
 testpaths = ["apps", "tests"]
-addopts = "-q --strict-markers"
+addopts = "-q --strict-markers --junitxml=reports/pytest.xml"
 filterwarnings = [
     "ignore::DeprecationWarning:django.*",
 ]

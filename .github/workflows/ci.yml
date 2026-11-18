@@ -70,6 +70,17 @@ jobs:
         run: |
           uv run coverage run -m pytest
           uv run coverage report
+          uv run coverage xml -o reports/coverage.xml
+      - name: 上传后端测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-report
+          path: |
+            backend/reports/pytest.xml
+            backend/reports/coverage.xml
+          retention-days: 30
+          if-no-files-found: warn
 
   frontend:
     name: frontend (eslint + tsc + vitest + build)
@@ -94,6 +105,14 @@ jobs:
       - name: 类型检查
         run: pnpm run type-check
       - name: 单元测试
-        run: pnpm run test
+        run: pnpm run test:report
+      - name: 上传前端测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-report
+          path: frontend/reports/vitest.xml
+          retention-days: 30
+          if-no-files-found: warn
       - name: 生产构建
         run: pnpm run build
