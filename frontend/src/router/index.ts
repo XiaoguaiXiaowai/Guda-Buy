@@ -83,6 +83,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '订单详情', requiresAuth: true },
   },
   {
+    path: '/user/orders/:orderNo/review',
+    name: 'user-order-review',
+    component: () => import('@/views/front/ReviewFormView.vue'),
+    meta: { title: '评价订单', requiresAuth: true },
+  },
+  {
     path: '/pay/:orderNo/result',
     name: 'payment-result',
     component: () => import('@/views/front/PaymentResultView.vue'),
@@ -115,6 +121,18 @@ const routes: RouteRecordRaw[] = [
     name: 'user-coupons',
     component: () => import('@/views/user/CouponListView.vue'),
     meta: { title: '我的优惠券', requiresAuth: true },
+  },
+  {
+    path: '/user/transactions',
+    name: 'user-transactions',
+    component: () => import('@/views/user/TransactionView.vue'),
+    meta: { title: '交易记录', requiresAuth: true },
+  },
+  {
+    path: '/user/notifications',
+    name: 'user-notifications',
+    component: () => import('@/views/user/NotificationListView.vue'),
+    meta: { title: '消息中心', requiresAuth: true },
   },
   {
     path: '/admin',
@@ -155,6 +173,12 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-coupons',
     component: () => import('@/views/admin/AdminCouponView.vue'),
     meta: { title: '优惠券管理', requiresAuth: true, requiresCatalogAdmin: true },
+  },
+  {
+    path: '/admin/reviews',
+    name: 'admin-reviews',
+    component: () => import('@/views/admin/AdminReviewView.vue'),
+    meta: { title: '评价审核', requiresAuth: true, requiresCatalogAdmin: true },
   },
   {
     path: '/:pathMatch(.*)*',

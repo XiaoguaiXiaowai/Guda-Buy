@@ -31,6 +31,12 @@ export interface OrderAddressSnapshot {
   postal_code: string
 }
 
+export interface OrderSummary {
+  counts: Record<string, number>
+  amounts: Record<string, string>
+  paid_amount: string
+}
+
 export interface OrderPayment {
   payment_no: string
   channel: string

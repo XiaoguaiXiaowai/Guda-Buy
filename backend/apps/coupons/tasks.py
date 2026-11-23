@@ -1,4 +1,4 @@
-"""优惠券定时任务：过期置位与到期前扫描（消息在 I8 接入）。"""
+"""优惠券定时任务：过期置位与到期前提醒。"""
 
 import logging
 
@@ -6,6 +6,7 @@ from celery import shared_task
 from django.conf import settings
 
 from apps.coupons import services
+from apps.notifications import services as notification_services
 
 logger = logging.getLogger("guda.coupons")
 
@@ -25,14 +26,19 @@ def expire_user_coupons(limit: int | None = None) -> int:
 
 @shared_task(name="coupons.tasks.remind_expiring_coupons")
 def remind_expiring_coupons(days: int | None = None) -> int:
-    """扫描 N 天内到期的未使用券；I8 在此逐条写入 COUPON_EXPIRING 站内消息。"""
+    """扫描 N 天内到期的未使用券，逐张写入 COUPON_EXPIRING 站内消息（同券只提醒一次）。"""
     window = days or settings.COUPON_EXPIRING_DAYS
     user_coupons = services.expiring_user_coupons(window)
+    created = 0
+    for user_coupon in user_coupons:
+        if notification_services.notify_coupon_expiring(user_coupon) is not None:
+            created += 1
     if user_coupons:
         logger.info(
-            "优惠券到期提醒待发送 count=%s days=%s",
+            "优惠券到期提醒已发送 created=%s candidates=%s days=%s",
+            created,
             len(user_coupons),
             window,
             extra={"action": "remind_expiring_coupons", "result": "ok"},
         )
-    return len(user_coupons)
+    return created

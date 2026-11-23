@@ -2,6 +2,8 @@
 
 from decimal import Decimal
 
+from django.db.models import Count, Sum
+
 from apps.coupons import selectors as coupon_selectors
 from apps.orders.models import Order
 from apps.payments.models import Payment
@@ -9,6 +11,7 @@ from apps.payments.models import Payment
 STATUS_TEXT = dict(Order.Status.choices)
 PAYMENT_STATUS_TEXT = dict(Payment.Status.choices)
 PAYMENT_CHANNEL_TEXT = dict(Payment.Channel.choices)
+PAID_STATUSES = (Order.Status.PAID, Order.Status.SHIPPED, Order.Status.COMPLETED)
 
 
 def _money(value) -> str:
@@ -95,6 +98,32 @@ def order_brief(order: Order, *, include_user: bool = False) -> dict:
             "email": order.user.email,
         }
     return payload
+
+
+def order_summary(user) -> dict:
+    """交易记录聚合：按状态分组计数与金额，paid_amount 仅统计已支付及之后的状态。"""
+    rows = (
+        Order.objects.filter(user=user, is_deleted=False)
+        .values("status")
+        .annotate(count=Count("id"), amount=Sum("payable_amount"))
+    )
+    counts = dict.fromkeys(Order.Status.values, 0)
+    amounts = dict.fromkeys(Order.Status.values, Decimal("0.00"))
+    for row in rows:
+        if row["status"] not in counts:
+            continue
+        counts[row["status"]] = row["count"]
+        amounts[row["status"]] = row["amount"] or Decimal("0.00")
+
+    paid_amount = sum((amounts[status] for status in PAID_STATUSES), Decimal("0.00"))
+    return {
+        "counts": {"ALL": sum(counts.values()), **counts},
+        "amounts": {
+            "ALL": _money(sum(amounts.values(), Decimal("0.00"))),
+            **{status: _money(amount) for status, amount in amounts.items()},
+        },
+        "paid_amount": _money(paid_amount),
+    }
 
 
 def order_detail(order: Order, *, include_user: bool = False) -> dict:

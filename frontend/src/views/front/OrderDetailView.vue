@@ -134,6 +134,9 @@ onMounted(() => {
           <p v-else-if="order.status === 'CANCELLED'" class="status-panel__hint">
             取消原因：{{ order.cancel_reason || '用户取消' }}
           </p>
+          <p v-else-if="order.status === 'COMPLETED'" class="status-panel__hint">
+            交易已完成，可在评价期限内分享使用体验。
+          </p>
         </div>
         <div class="status-panel__actions">
           <el-button v-if="order.can_cancel" :loading="acting" @click="cancel">
@@ -148,6 +151,12 @@ onMounted(() => {
           >
             确认收货
           </el-button>
+          <RouterLink
+            v-if="order.status === 'COMPLETED'"
+            :to="`/user/orders/${order.order_no}/review`"
+          >
+            <el-button type="primary" plain>评价订单</el-button>
+          </RouterLink>
         </div>
       </section>
 

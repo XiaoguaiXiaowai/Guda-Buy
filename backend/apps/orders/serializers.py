@@ -144,3 +144,9 @@ class OrderDetailSerializer(OrderBriefSerializer):
 
 class AdminOrderBriefSerializer(OrderBriefSerializer):
     user = OrderUserSerializer()
+
+
+class OrderSummarySerializer(serializers.Serializer):
+    counts = serializers.DictField(child=serializers.IntegerField())
+    amounts = serializers.DictField(child=serializers.CharField())
+    paid_amount = serializers.CharField()

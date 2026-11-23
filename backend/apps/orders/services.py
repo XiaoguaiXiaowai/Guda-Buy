@@ -17,6 +17,7 @@ from apps.catalog.models import Product, Sku
 from apps.common.exceptions import BusinessError
 from apps.coupons import selectors as coupon_selectors
 from apps.coupons import services as coupon_services
+from apps.notifications import services as notification_services
 from apps.orders.models import Order, OrderItem, OrderStatusLog
 from apps.orders.pricing import calculate as calculate_amounts
 from apps.orders.pricing import money as _money
@@ -392,6 +393,9 @@ def cancel_order(user, order_no: str, reason: str = "用户取消") -> Order:
         operator=user,
         remark=order.cancel_reason,
     )
+    transaction.on_commit(
+        lambda: notification_services.notify_order_cancelled(order, reason=order.cancel_reason)
+    )
     return order
 
 
@@ -416,6 +420,9 @@ def cancel_timeout_order(order_id: int) -> bool:
         from_status=Order.Status.PENDING_PAYMENT,
         to_status=Order.Status.CANCELLED,
         remark=order.cancel_reason,
+    )
+    transaction.on_commit(
+        lambda: notification_services.notify_order_cancelled(order, reason=order.cancel_reason)
     )
     return True
 
@@ -442,6 +449,7 @@ def ship_order(order_no: str, tracking_no: str, operator) -> Order:
         operator=operator,
         remark=f"运单号 {order.tracking_no}",
     )
+    transaction.on_commit(lambda: notification_services.notify_order_shipped(order))
     return order
 
 

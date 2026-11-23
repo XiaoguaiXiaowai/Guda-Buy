@@ -110,6 +110,8 @@ onMounted(() => {
         <RouterLink to="/user/profile">个人资料</RouterLink>
         <RouterLink to="/user/addresses">收货地址</RouterLink>
         <RouterLink to="/user/orders">我的订单</RouterLink>
+        <RouterLink to="/user/transactions">交易记录</RouterLink>
+        <RouterLink to="/user/notifications">消息中心</RouterLink>
       </nav>
     </header>
 
@@ -208,6 +210,12 @@ onMounted(() => {
               >
                 去支付
               </el-button>
+              <RouterLink
+                v-if="order.status === 'COMPLETED'"
+                :to="`/user/orders/${order.order_no}/review`"
+              >
+                <el-button size="small" type="primary" plain>评价</el-button>
+              </RouterLink>
               <el-button
                 v-if="order.can_confirm"
                 size="small"

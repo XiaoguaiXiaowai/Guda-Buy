@@ -143,6 +143,9 @@ onMounted(load)
       <nav class="user-tabs" aria-label="个人中心导航">
         <RouterLink to="/user/profile">个人资料</RouterLink>
         <RouterLink to="/user/addresses">收货地址</RouterLink>
+        <RouterLink to="/user/orders">我的订单</RouterLink>
+        <RouterLink to="/user/transactions">交易记录</RouterLink>
+        <RouterLink to="/user/notifications">消息中心</RouterLink>
       </nav>
     </header>
 

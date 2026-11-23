@@ -17,6 +17,7 @@ from apps.orders.serializers import (
     OrderDetailSerializer,
     OrderPreviewRequestSerializer,
     OrderPreviewSerializer,
+    OrderSummarySerializer,
     ShipOrderSerializer,
 )
 
@@ -122,6 +123,21 @@ class OrderListCreateView(generics.GenericAPIView):
         order = _fetch_order(order.order_no, user=request.user)
         payload = selectors.order_detail(order)
         return Response(payload, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+
+class OrderSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="交易记录汇总",
+        description=(
+            "按订单状态统计数量与应付金额，供个人中心交易记录页展示；"
+            "金额为两位小数字符串，与订单明细一致。"
+        ),
+        responses={200: OrderSummarySerializer},
+    )
+    def get(self, request):
+        return Response(selectors.order_summary(request.user))
 
 
 class OrderDetailView(APIView):

@@ -7,6 +7,7 @@ import type {
   OrderPreview,
   OrderPreviewPayload,
   OrderQuery,
+  OrderSummary,
 } from '@/types/order'
 
 export async function fetchOrderPreview(payload: OrderPreviewPayload): Promise<OrderPreview> {
@@ -26,6 +27,11 @@ export async function createOrder(
 
 export async function fetchOrders(query: OrderQuery = {}): Promise<Paginated<OrderBrief>> {
   const { data } = await http.get<Paginated<OrderBrief>>('/orders/', { params: query })
+  return data
+}
+
+export async function fetchOrderSummary(): Promise<OrderSummary> {
+  const { data } = await http.get<OrderSummary>('/users/me/orders/summary/')
   return data
 }
 

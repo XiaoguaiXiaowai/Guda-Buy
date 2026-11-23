@@ -9,6 +9,7 @@ from django.db.models.functions import Coalesce
 from apps.catalog import cache
 from apps.catalog.models import Category, Product, Sku
 from apps.common.exceptions import BusinessError
+from apps.reviews import selectors as review_selectors
 
 PRODUCT_ORDERING = {
     "default": ("-sort_weight", "-sales_count", "-id"),
@@ -173,11 +174,7 @@ def _product_detail_payload(product: Product) -> dict:
             for image in product.images.all()
         ],
         "skus": [_sku_payload(sku) for sku in skus],
-        "review_summary": {
-            "average": "0.00",
-            "count": 0,
-            "distribution": {str(star): 0 for star in range(5, 0, -1)},
-        },
+        "review_summary": review_selectors.review_summary(product.id),
         "created_at": product.created_at.isoformat(),
     }
 

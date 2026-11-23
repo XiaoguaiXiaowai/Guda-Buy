@@ -9,6 +9,7 @@ app_name = "orders"
 
 urlpatterns = [
     path("orders/preview/", api.OrderPreviewView.as_view(), name="preview"),
+    path("users/me/orders/summary/", api.OrderSummaryView.as_view(), name="summary"),
     path("orders/", api.OrderListCreateView.as_view(), name="list-create"),
     path("orders/<str:order_no>/", api.OrderDetailView.as_view(), name="detail"),
     path(

@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "apps.orders",
     "apps.payments",
     "apps.coupons",
+    "apps.notifications",
+    "apps.reviews",
 ]
 
 MIDDLEWARE = [
@@ -324,6 +326,12 @@ ORDER_AUTO_CONFIRM_DAYS = env.int("ORDER_AUTO_CONFIRM_DAYS", default=15)
 ORDER_BATCH_LIMIT = env.int("ORDER_BATCH_LIMIT", default=100)
 # 优惠券到期前提醒窗口（天）
 COUPON_EXPIRING_DAYS = env.int("COUPON_EXPIRING_DAYS", default=3)
+
+# 用户评价（架构文档 10.7）
+REVIEW_WINDOW_DAYS = env.int("REVIEW_WINDOW_DAYS", default=7)
+REVIEW_MAX_IMAGES = env.int("REVIEW_MAX_IMAGES", default=3)
+REVIEW_IMAGE_MAX_BYTES = env.int("REVIEW_IMAGE_MAX_BYTES", default=5 * 1024 * 1024)
+REVIEW_SENSITIVE_WORDS = env.list("REVIEW_SENSITIVE_WORDS", default=[])
 
 # CMS 内容运营（架构文档 10.9 / 3.6）
 CMS_HOME_CACHE_SECONDS = env.int("CMS_HOME_CACHE_SECONDS", default=300)

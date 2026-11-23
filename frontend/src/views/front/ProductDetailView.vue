@@ -4,11 +4,14 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { fetchProduct, fetchRelatedProducts } from '@/api/catalog'
+import { fetchProductReviews } from '@/api/review'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import type { ProductDetail, ProductListItem, Sku } from '@/types/catalog'
+import type { PublicReview } from '@/types/review'
 import { formatPriceRange, resolveImageUrl, stockTone } from '@/utils/catalog'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatDateTime } from '@/utils/format'
+import { distributionPercent } from '@/utils/review'
 
 const route = useRoute()
 const router = useRouter()
@@ -22,6 +25,11 @@ const notFound = ref(false)
 const adding = ref(false)
 const selectedSkuId = ref('')
 const activeImage = ref('')
+const reviews = ref<PublicReview[]>([])
+const reviewTotal = ref(0)
+const reviewPage = ref(1)
+const reviewLoading = ref(false)
+const reviewPageSize = 5
 
 const selectedSku = computed<Sku | null>(
   () => product.value?.skus.find((sku) => sku.public_id === selectedSkuId.value) ?? null,
@@ -42,6 +50,30 @@ const currentPrice = computed(() => {
   return product.value ? formatPriceRange(product.value.price_min, product.value.price_max) : '-'
 })
 
+async function loadReviews(publicId: string, page = 1) {
+  reviewLoading.value = true
+  try {
+    const data = await fetchProductReviews(publicId, { page, page_size: reviewPageSize })
+    reviews.value = data.results
+    reviewTotal.value = data.count
+    reviewPage.value = page
+  } catch {
+    reviews.value = []
+    reviewTotal.value = 0
+  } finally {
+    reviewLoading.value = false
+  }
+}
+
+function reviewPercent(star: number): number {
+  const count = product.value?.review_summary.distribution[String(star)] ?? 0
+  return distributionPercent(count, product.value?.review_summary.count ?? 0)
+}
+
+function changeReviewPage(page: number) {
+  void loadReviews(String(route.params.publicId), page)
+}
+
 async function load(publicId: string) {
   loading.value = true
   notFound.value = false
@@ -58,6 +90,7 @@ async function load(publicId: string) {
   } finally {
     loading.value = false
   }
+  await loadReviews(publicId)
 }
 
 function selectSku(sku: Sku) {
@@ -205,9 +238,61 @@ onMounted(() => {
 
       <div class="product-detail__section">
         <h2>用户评价</h2>
-        <p class="product-detail__description">
-          暂无评价（当前评分汇总为占位数据，评价体系将在后续迭代接入）。
-        </p>
+
+        <div v-if="product.review_summary.count" class="review-summary">
+          <div class="review-summary__score">
+            <strong>{{ product.review_summary.average }}</strong>
+            <el-rate
+              :model-value="Number(product.review_summary.average)"
+              disabled
+              allow-half
+            />
+            <span>{{ product.review_summary.count }} 条已通过评价</span>
+          </div>
+          <div class="review-summary__bars">
+            <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="review-summary__bar">
+              <span>{{ star }} 星</span>
+              <el-progress :percentage="reviewPercent(star)" :show-text="false" :stroke-width="8" />
+              <span>{{ product.review_summary.distribution[String(star)] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+        <p v-else class="product-detail__description">暂无已通过审核的评价。</p>
+
+        <div v-loading="reviewLoading" class="review-list">
+          <article v-for="item in reviews" :key="item.public_id" class="review-list__item">
+            <header class="review-list__head">
+              <el-avatar :size="32" :src="item.avatar ? resolveImageUrl(item.avatar) : undefined">
+                {{ item.display_name.slice(0, 1) }}
+              </el-avatar>
+              <strong>{{ item.display_name }}</strong>
+              <el-rate :model-value="item.rating" disabled />
+              <time>{{ formatDateTime(item.created_at) }}</time>
+            </header>
+            <p class="review-list__content">{{ item.content }}</p>
+            <span class="review-list__spec">{{ item.sku_spec }}</span>
+            <div v-if="item.images.length" class="review-list__images">
+              <el-image
+                v-for="image in item.images"
+                :key="image.public_id"
+                :src="resolveImageUrl(image.image)"
+                :preview-src-list="item.images.map((pic) => resolveImageUrl(pic.image))"
+                fit="cover"
+                preview-teleported
+              />
+            </div>
+          </article>
+        </div>
+
+        <el-pagination
+          v-if="reviewTotal > reviewPageSize"
+          class="review-pagination"
+          layout="prev, pager, next"
+          :total="reviewTotal"
+          :page-size="reviewPageSize"
+          :current-page="reviewPage"
+          @current-change="changeReviewPage"
+        />
       </div>
 
       <div v-if="related.length" class="product-detail__section">
@@ -405,6 +490,107 @@ onMounted(() => {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 18px;
   }
+}
+
+.review-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  margin: 18px 0 24px;
+
+  &__score {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+
+    strong {
+      font-size: 40px;
+      line-height: 1;
+      color: var(--guda-primary);
+    }
+
+    span {
+      color: var(--guda-text-muted);
+      font-size: 12px;
+    }
+  }
+
+  &__bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__bar {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 32px;
+    align-items: center;
+    gap: 10px;
+    color: var(--guda-text-muted);
+    font-size: 12px;
+  }
+}
+
+.review-list {
+  min-height: 60px;
+
+  &__item {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--guda-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    strong {
+      font-size: 14px;
+    }
+
+    time {
+      margin-left: auto;
+      color: var(--guda-text-muted);
+      font-size: 12px;
+    }
+  }
+
+  &__content {
+    margin: 10px 0 6px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  &__spec {
+    color: var(--guda-text-muted);
+    font-size: 12px;
+  }
+
+  &__images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+
+    :deep(.el-image) {
+      width: 84px;
+      height: 84px;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+  }
+}
+
+.review-pagination {
+  margin-top: 16px;
+  justify-content: center;
 }
 
 .related-card {

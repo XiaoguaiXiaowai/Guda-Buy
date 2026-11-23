@@ -28,6 +28,8 @@ urlpatterns += [
     path("api/v1/", include("apps.orders.urls")),
     path("api/v1/", include("apps.payments.urls")),
     path("api/v1/", include("apps.coupons.urls")),
+    path("api/v1/", include("apps.notifications.urls")),
+    path("api/v1/", include("apps.reviews.urls")),
 ]
 
 handler404 = "apps.common.exceptions.not_found_handler"

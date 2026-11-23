@@ -13,6 +13,7 @@ from django.utils import timezone
 from apps.catalog.models import Sku
 from apps.common.exceptions import BusinessError
 from apps.coupons import services as coupon_services
+from apps.notifications import services as notification_services
 from apps.orders.models import Order, OrderStatusLog
 from apps.payments.models import Payment
 from apps.payments.signature import sign_payment, verify_payment_signature
@@ -201,7 +202,8 @@ def _apply_success(payment_id: int, payload: dict) -> Payment:
         remark="模拟支付成功",
     )
     _close_pending_payments(order, exclude_id=payment.pk)
-    # I8 接入：在 transaction.on_commit 中写入 ORDER_PAID 站内消息
+    # 站内消息在提交后写入，写失败不影响支付主事务
+    transaction.on_commit(lambda: notification_services.notify_order_paid(order))
     return payment
 
 

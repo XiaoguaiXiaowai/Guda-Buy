@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
+import { useNotificationStore } from '@/stores/notification'
 
 const router = useRouter()
 const auth = useAuthStore()
 const cart = useCartStore()
+const notifications = useNotificationStore()
 
 async function handleAccountCommand(command: string) {
   if (command === 'logout') {
     await auth.logout()
     cart.reset()
+    notifications.reset()
+    notifications.stopPolling()
     await router.push('/')
     return
   }
@@ -22,7 +26,12 @@ async function handleAccountCommand(command: string) {
 onMounted(() => {
   if (auth.isAuthenticated) {
     void cart.refreshCount()
+    notifications.startPolling()
   }
+})
+
+onBeforeUnmount(() => {
+  notifications.stopPolling()
 })
 
 watch(
@@ -30,8 +39,11 @@ watch(
   (authenticated) => {
     if (authenticated) {
       void cart.refreshCount()
+      notifications.startPolling()
     } else {
       cart.reset()
+      notifications.reset()
+      notifications.stopPolling()
     }
   },
 )
@@ -54,6 +66,15 @@ watch(
               :max="99"
             />
           </RouterLink>
+          <RouterLink to="/user/notifications" class="front-layout__messages">
+            消息
+            <el-badge
+              v-if="notifications.unreadCount"
+              class="front-layout__badge"
+              :value="notifications.unreadCount"
+              :max="99"
+            />
+          </RouterLink>
           <RouterLink to="/user/profile">我的</RouterLink>
         </nav>
 
@@ -72,8 +93,10 @@ watch(
             <el-dropdown-menu>
               <el-dropdown-item command="/user/profile">个人资料</el-dropdown-item>
               <el-dropdown-item command="/user/orders">我的订单</el-dropdown-item>
+              <el-dropdown-item command="/user/transactions">交易记录</el-dropdown-item>
               <el-dropdown-item command="/user/coupons">我的优惠券</el-dropdown-item>
               <el-dropdown-item command="/user/addresses">收货地址</el-dropdown-item>
+              <el-dropdown-item command="/user/notifications">消息中心</el-dropdown-item>
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/products" divided>
                 商品后台
               </el-dropdown-item>
@@ -82,6 +105,9 @@ watch(
               </el-dropdown-item>
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/coupons">
                 优惠券后台
+              </el-dropdown-item>
+              <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/reviews">
+                评价审核后台
               </el-dropdown-item>
               <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
             </el-dropdown-menu>
@@ -156,6 +182,12 @@ watch(
   }
 
   &__cart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__messages {
     display: inline-flex;
     align-items: center;
     gap: 8px;
