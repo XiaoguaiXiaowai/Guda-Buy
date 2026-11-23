@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "apps.cart",
     "apps.orders",
     "apps.payments",
+    "apps.coupons",
 ]
 
 MIDDLEWARE = [
@@ -136,6 +137,14 @@ CELERY_BEAT_SCHEDULE = {
     "orders-auto-confirm": {
         "task": "orders.tasks.auto_confirm_orders",
         "schedule": 3600.0,
+    },
+    "coupons-expire": {
+        "task": "coupons.tasks.expire_user_coupons",
+        "schedule": 86400.0,
+    },
+    "coupons-expiring-remind": {
+        "task": "coupons.tasks.remind_expiring_coupons",
+        "schedule": 86400.0,
     },
 }
 
@@ -313,6 +322,8 @@ ORDER_FREE_SHIPPING_THRESHOLD = env.int("ORDER_FREE_SHIPPING_THRESHOLD", default
 ORDER_SHIPPING_AMOUNT = env.int("ORDER_SHIPPING_AMOUNT", default=10)
 ORDER_AUTO_CONFIRM_DAYS = env.int("ORDER_AUTO_CONFIRM_DAYS", default=15)
 ORDER_BATCH_LIMIT = env.int("ORDER_BATCH_LIMIT", default=100)
+# 优惠券到期前提醒窗口（天）
+COUPON_EXPIRING_DAYS = env.int("COUPON_EXPIRING_DAYS", default=3)
 
 # CMS 内容运营（架构文档 10.9 / 3.6）
 CMS_HOME_CACHE_SECONDS = env.int("CMS_HOME_CACHE_SECONDS", default=300)

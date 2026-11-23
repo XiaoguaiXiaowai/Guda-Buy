@@ -111,6 +111,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '收货地址', requiresAuth: true },
   },
   {
+    path: '/user/coupons',
+    name: 'user-coupons',
+    component: () => import('@/views/user/CouponListView.vue'),
+    meta: { title: '我的优惠券', requiresAuth: true },
+  },
+  {
     path: '/admin',
     redirect: '/admin/products',
   },
@@ -143,6 +149,12 @@ const routes: RouteRecordRaw[] = [
     name: 'admin-cms',
     component: () => import('@/views/admin/AdminCmsView.vue'),
     meta: { title: '内容运营', requiresAuth: true, requiresCmsAdmin: true },
+  },
+  {
+    path: '/admin/coupons',
+    name: 'admin-coupons',
+    component: () => import('@/views/admin/AdminCouponView.vue'),
+    meta: { title: '优惠券管理', requiresAuth: true, requiresCatalogAdmin: true },
   },
   {
     path: '/:pathMatch(.*)*',

@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from apps.catalog.models import Sku
 from apps.common.exceptions import BusinessError
+from apps.coupons import services as coupon_services
 from apps.orders.models import Order, OrderStatusLog
 from apps.payments.models import Payment
 from apps.payments.signature import sign_payment, verify_payment_signature
@@ -170,6 +171,7 @@ def _apply_success(payment_id: int, payload: dict) -> Payment:
 
     now = timezone.now()
     _consume_locked_stock(order)
+    coupon_services.mark_used_for_order(order)
 
     order.status = Order.Status.PAID
     order.paid_at = now

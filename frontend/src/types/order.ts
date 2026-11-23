@@ -1,3 +1,5 @@
+import type { CouponEvaluation, OrderCoupon } from '@/types/coupon'
+
 export type OrderStatus =
   | 'PENDING_PAYMENT'
   | 'PAID'
@@ -66,6 +68,7 @@ export interface OrderBrief {
 export interface OrderDetail extends OrderBrief {
   discount_amount: string
   shipping_amount: string
+  coupon: OrderCoupon | null
   address: OrderAddressSnapshot
   remark: string
   tracking_no: string
@@ -98,11 +101,14 @@ export interface OrderPreview {
   shipping_amount: string
   payable_amount: string
   free_shipping_threshold: string
+  coupons: CouponEvaluation[]
+  coupon: CouponEvaluation | null
 }
 
 export interface OrderPreviewPayload {
   cart_item_public_ids: string[]
   address_public_id: string
+  user_coupon_public_id?: string
 }
 
 export interface OrderCreatePayload extends OrderPreviewPayload {

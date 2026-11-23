@@ -13,7 +13,8 @@ import type { CartPayload } from '@/types/cart'
 import type { OrderPreview } from '@/types/order'
 import type { Address } from '@/types/user'
 import { resolveImageUrl } from '@/utils/catalog'
-import { formatCurrency } from '@/utils/format'
+import { couponConditionLabel, couponValueLabel } from '@/utils/coupon'
+import { formatCurrency, formatDateTime } from '@/utils/format'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -22,6 +23,7 @@ const addresses = ref<Address[]>([])
 const cart = ref<CartPayload | null>(null)
 const selectedIds = ref<string[]>([])
 const selectedAddressId = ref('')
+const selectedCouponId = ref('')
 const preview = ref<OrderPreview | null>(null)
 const remark = ref('')
 const idempotencyKey = ref(newIdempotencyKey())
@@ -33,6 +35,9 @@ const previewError = ref('')
 
 const selectedCount = computed(() => selectedIds.value.length)
 const hasAddress = computed(() => addresses.value.length > 0)
+const selectedCouponUnusable = computed(
+  () => !!selectedCouponId.value && !!preview.value?.coupon && !preview.value.coupon.usable,
+)
 
 function newIdempotencyKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -55,6 +60,7 @@ async function load(): Promise<void> {
       addressData.find((address) => address.is_default)?.public_id ??
       addressData[0]?.public_id ??
       ''
+    selectedCouponId.value = ''
     await refreshPreview()
   } catch {
     failed.value = true
@@ -74,6 +80,7 @@ async function refreshPreview(): Promise<void> {
     preview.value = await fetchOrderPreview({
       cart_item_public_ids: selectedIds.value,
       address_public_id: selectedAddressId.value,
+      user_coupon_public_id: selectedCouponId.value || undefined,
     })
   } catch (error) {
     preview.value = null
@@ -96,6 +103,18 @@ watch(selectedAddressId, () => {
   void refreshPreview()
 })
 
+function selectCoupon(publicId: string): void {
+  if (selectedCouponId.value === publicId) {
+    return
+  }
+  selectedCouponId.value = publicId
+}
+
+watch(selectedCouponId, () => {
+  idempotencyKey.value = newIdempotencyKey()
+  void refreshPreview()
+})
+
 function regenerateKey(): void {
   idempotencyKey.value = newIdempotencyKey()
 }
@@ -105,12 +124,17 @@ async function submit(): Promise<void> {
     ElMessage.warning('请先选择收货地址与结算商品')
     return
   }
+  if (selectedCouponUnusable.value) {
+    ElMessage.warning(`所选优惠券不可用：${preview.value.coupon?.reason ?? '请重新选择'}`)
+    return
+  }
   submitting.value = true
   try {
     const order = await createOrder(
       {
         cart_item_public_ids: selectedIds.value,
         address_public_id: selectedAddressId.value,
+        user_coupon_public_id: selectedCouponId.value || undefined,
         remark: remark.value.trim(),
       },
       idempotencyKey.value,
@@ -235,6 +259,68 @@ onMounted(() => {
 
           <section class="panel">
             <header class="panel__header">
+              <h2>优惠券</h2>
+              <RouterLink class="panel__link" to="/user/coupons" target="_blank">
+                我的优惠券
+              </RouterLink>
+            </header>
+
+            <el-skeleton v-if="previewLoading" :rows="2" animated />
+            <el-empty
+              v-else-if="!preview?.coupons.length"
+              description="暂无可用优惠券"
+              :image-size="56"
+            />
+            <div v-else class="coupon-list">
+              <button
+                type="button"
+                class="coupon-option"
+                :class="{ 'is-active': !selectedCouponId }"
+                @click="selectCoupon('')"
+              >
+                <span class="coupon-option__radio" />
+                <span class="coupon-option__body">
+                  <strong>不使用优惠券</strong>
+                </span>
+              </button>
+              <button
+                v-for="coupon in preview.coupons"
+                :key="coupon.user_coupon_id"
+                type="button"
+                class="coupon-option"
+                :class="{
+                  'is-active': coupon.user_coupon_id === selectedCouponId,
+                  'is-disabled': !coupon.usable,
+                }"
+                :disabled="!coupon.usable"
+                @click="selectCoupon(coupon.user_coupon_id)"
+              >
+                <span class="coupon-option__radio" />
+                <span class="coupon-option__body">
+                  <span class="coupon-option__line">
+                    <strong class="coupon-option__value">{{ couponValueLabel(coupon) }}</strong>
+                    <span class="coupon-option__name">{{ coupon.name }}</span>
+                    <el-tag v-if="coupon.usable" size="small" type="danger" effect="plain">
+                      -{{ formatCurrency(coupon.discount_amount) }}
+                    </el-tag>
+                  </span>
+                  <span class="coupon-option__meta">
+                    {{ couponConditionLabel(coupon.min_amount) }} · {{ coupon.scope_summary }} ·
+                    {{ formatDateTime(coupon.expires_at) }} 到期
+                  </span>
+                  <span v-if="!coupon.usable" class="coupon-option__reason">
+                    {{ coupon.reason }}
+                  </span>
+                </span>
+              </button>
+            </div>
+            <p v-if="selectedCouponUnusable" class="coupon-warning">
+              所选优惠券已不可用，请重新选择后再提交。
+            </p>
+          </section>
+
+          <section class="panel">
+            <header class="panel__header">
               <h2>订单备注</h2>
             </header>
             <el-input
@@ -306,7 +392,13 @@ onMounted(() => {
               size="large"
               class="summary__submit"
               :loading="submitting"
-              :disabled="!preview || previewLoading || !!previewError || !selectedAddressId"
+              :disabled="
+                !preview ||
+                  previewLoading ||
+                  !!previewError ||
+                  !selectedAddressId ||
+                  selectedCouponUnusable
+              "
               @click="submit"
             >
               提交订单
@@ -484,6 +576,95 @@ onMounted(() => {
     font-size: 13px;
     line-height: 1.5;
   }
+}
+
+.coupon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.coupon-option {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid var(--guda-border);
+  border-radius: 10px;
+  background: var(--guda-surface);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+
+  &:hover:not(.is-disabled) {
+    border-color: var(--guda-primary-soft);
+  }
+
+  &.is-active {
+    border-color: var(--guda-primary);
+    box-shadow: 0 0 0 1px var(--guda-primary-soft) inset;
+  }
+
+  &.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+    background: #fafafa;
+  }
+
+  &__radio {
+    width: 16px;
+    height: 16px;
+    margin-top: 3px;
+    border-radius: 50%;
+    border: 1px solid var(--guda-border);
+    flex: none;
+  }
+
+  &.is-active &__radio {
+    border: 5px solid var(--guda-primary);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    font-size: 13px;
+  }
+
+  &__line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__value {
+    color: var(--guda-primary);
+    font-size: 15px;
+  }
+
+  &__name {
+    font-weight: 600;
+  }
+
+  &__meta {
+    color: var(--guda-text-muted);
+    font-size: 12px;
+  }
+
+  &__reason {
+    color: var(--guda-danger, #c0392b);
+    font-size: 12px;
+  }
+}
+
+.coupon-warning {
+  margin-top: 10px;
+  color: var(--guda-danger, #c0392b);
+  font-size: 12px;
 }
 
 .goods {

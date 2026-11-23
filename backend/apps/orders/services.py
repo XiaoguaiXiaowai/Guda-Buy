@@ -15,7 +15,11 @@ from apps.cart.models import CartItem
 from apps.catalog import cache as catalog_cache
 from apps.catalog.models import Product, Sku
 from apps.common.exceptions import BusinessError
+from apps.coupons import selectors as coupon_selectors
+from apps.coupons import services as coupon_services
 from apps.orders.models import Order, OrderItem, OrderStatusLog
+from apps.orders.pricing import calculate as calculate_amounts
+from apps.orders.pricing import money as _money
 from apps.payments import services as payment_services
 from apps.payments.models import Payment
 
@@ -29,17 +33,6 @@ UNFINISHED_STATUSES = (
 # ---------------------------------------------------------------------------
 # 金额与快照
 # ---------------------------------------------------------------------------
-def _money(value) -> Decimal:
-    return Decimal(value or 0).quantize(Decimal("0.01"))
-
-
-def _shipping_amount(items_amount: Decimal) -> Decimal:
-    threshold = Decimal(settings.ORDER_FREE_SHIPPING_THRESHOLD)
-    if items_amount >= threshold:
-        return Decimal("0.00")
-    return _money(settings.ORDER_SHIPPING_AMOUNT)
-
-
 def _request_hash(payload: dict) -> str:
     canonical = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -72,7 +65,7 @@ def _load_cart_items(user, item_public_ids: list[str]) -> list[CartItem]:
     ids = list(dict.fromkeys(item_public_ids))
     items = list(
         CartItem.objects.filter(user=user, public_id__in=ids, is_deleted=False)
-        .select_related("sku__product")
+        .select_related("sku__product__category")
         .order_by("-created_at", "-id")
     )
     if len(items) != len(ids):
@@ -117,31 +110,53 @@ def _ensure_orderable(sku: Sku, quantity: int) -> None:
         )
 
 
-def _calculate(items: list[CartItem]) -> dict:
+def _calculate(items: list[CartItem], evaluation: dict | None = None) -> dict:
     items_amount = Decimal("0.00")
     for item in items:
         items_amount += _money(item.sku.sale_price) * item.quantity
     items_amount = _money(items_amount)
-    shipping_amount = _shipping_amount(items_amount)
-    return {
-        "items_amount": items_amount,
-        "discount_amount": Decimal("0.00"),
-        "shipping_amount": shipping_amount,
-        "payable_amount": _money(items_amount + shipping_amount),
-    }
+    if evaluation is None:
+        return calculate_amounts(items_amount)
+    return calculate_amounts(
+        items_amount,
+        discount_amount=evaluation["discount_amount"],
+        free_shipping=evaluation.get("free_shipping", False),
+    )
+
+
+def _coupon_lines(items: list[CartItem]) -> list[dict]:
+    return [
+        coupon_services.make_line(item.sku.product, item.sku.sale_price, item.quantity)
+        for item in items
+    ]
 
 
 # ---------------------------------------------------------------------------
 # 结算预览
 # ---------------------------------------------------------------------------
-def preview_order(user, *, cart_item_public_ids: list[str], address_public_id: str) -> dict:
-    """只读试算：与下单共用金额规则，不锁库存、不写库。"""
+def preview_order(
+    user,
+    *,
+    cart_item_public_ids: list[str],
+    address_public_id: str,
+    user_coupon_public_id: str = "",
+) -> dict:
+    """只读试算：与下单共用金额规则，不锁库存、不写库，附带可用券列表。"""
     address = _get_user_address(user, address_public_id)
     items = _load_cart_items(user, cart_item_public_ids)
     for item in items:
         _ensure_orderable(item.sku, item.quantity)
 
-    amounts = _calculate(items)
+    lines = _coupon_lines(items)
+    base_amounts = _calculate(items)
+    coupon_result = coupon_services.evaluate_coupons_for_user(
+        user,
+        lines=lines,
+        items_amount=base_amounts["items_amount"],
+        selected_public_id=user_coupon_public_id,
+    )
+    selected = coupon_result["selected"]
+    amounts = _calculate(items, selected)
     return {
         "address": _address_snapshot(address),
         "items": [
@@ -158,8 +173,13 @@ def preview_order(user, *, cart_item_public_ids: list[str], address_public_id: s
             }
             for item in items
         ],
-        **{key: f"{value:.2f}" for key, value in amounts.items()},
+        **{key: f"{value:.2f}" for key, value in amounts.items() if key != "taxable_amount"},
         "free_shipping_threshold": f"{_money(settings.ORDER_FREE_SHIPPING_THRESHOLD):.2f}",
+        "coupons": [
+            coupon_selectors.evaluation_payload(evaluation)
+            for evaluation in coupon_result["evaluations"]
+        ],
+        "coupon": (coupon_selectors.evaluation_payload(selected) if selected is not None else None),
     }
 
 
@@ -177,13 +197,15 @@ def create_order(
     address_public_id: str,
     remark: str,
     idempotency_key: str,
+    user_coupon_public_id: str = "",
 ) -> tuple[Order, bool]:
-    """下单入口：先查幂等键，再在事务内创建订单、锁库存、建支付单并清理购物车。"""
+    """下单入口：先查幂等键，再在事务内创建订单、锁库存、锁券、建支付单并清理购物车。"""
     fingerprint = _request_hash(
         {
             "cart_item_public_ids": sorted(set(cart_item_public_ids)),
             "address_public_id": address_public_id,
             "remark": remark,
+            "user_coupon_public_id": user_coupon_public_id,
         }
     )
 
@@ -203,6 +225,7 @@ def create_order(
             remark=remark,
             idempotency_key=idempotency_key,
             fingerprint=fingerprint,
+            user_coupon_public_id=user_coupon_public_id,
         ), True
     except IntegrityError as exc:
         # 并发重复提交：唯一约束兜底，返回已创建的订单
@@ -223,6 +246,7 @@ def _create_order_atomic(
     remark: str,
     idempotency_key: str,
     fingerprint: str,
+    user_coupon_public_id: str = "",
 ) -> Order:
     address = _get_user_address(user, address_public_id)
     items = _load_cart_items(user, cart_item_public_ids)
@@ -244,7 +268,18 @@ def _create_order_atomic(
         _ensure_orderable(sku, item.quantity)
         quantities[sku.id] = quantities.get(sku.id, 0) + item.quantity
 
-    amounts = _calculate(items)
+    lines = _coupon_lines(items)
+    base_amounts = _calculate(items)
+    evaluation = None
+    if user_coupon_public_id:
+        evaluation = coupon_services.lock_for_preview(
+            user,
+            user_coupon_public_id,
+            lines=lines,
+            items_amount=base_amounts["items_amount"],
+        )
+    amounts = _calculate(items, evaluation)
+
     order = Order.objects.create(
         order_no=_generate_order_no(),
         user=user,
@@ -253,6 +288,7 @@ def _create_order_atomic(
         discount_amount=amounts["discount_amount"],
         shipping_amount=amounts["shipping_amount"],
         payable_amount=amounts["payable_amount"],
+        user_coupon=evaluation["user_coupon"] if evaluation else None,
         address_snapshot=_address_snapshot(address),
         address_public_id=address.public_id,
         pay_expires_at=timezone.now() + timedelta(minutes=settings.APP_ORDER_TIMEOUT_MINUTES),
@@ -260,6 +296,16 @@ def _create_order_atomic(
         idempotency_key=idempotency_key,
         idempotency_request_hash=fingerprint,
     )
+
+    if user_coupon_public_id:
+        # 事务内二次校验并锁券，防止与并发下单/领券交叉
+        coupon_services.lock_for_order(
+            user,
+            user_coupon_public_id,
+            lines=lines,
+            items_amount=base_amounts["items_amount"],
+            order=order,
+        )
 
     OrderItem.objects.bulk_create(
         [
@@ -332,6 +378,7 @@ def cancel_order(user, order_no: str, reason: str = "用户取消") -> Order:
         raise BusinessError("ORDER_STATUS_CONFLICT", "当前订单状态不允许取消", http_status=409)
 
     _release_stock(order)
+    coupon_services.release_for_order(order)
     _close_pending_payments(order)
     from_status = order.status
     order.status = Order.Status.CANCELLED
@@ -358,6 +405,7 @@ def cancel_timeout_order(order_id: int) -> bool:
         return False
 
     _release_stock(order)
+    coupon_services.release_for_order(order)
     _close_pending_payments(order)
     order.status = Order.Status.CANCELLED
     order.cancelled_at = timezone.now()

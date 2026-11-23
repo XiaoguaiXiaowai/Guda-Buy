@@ -245,6 +245,10 @@ onMounted(() => {
                 <dt>优惠</dt>
                 <dd>-{{ formatCurrency(order.discount_amount) }}</dd>
               </div>
+              <div v-if="order.coupon">
+                <dt>优惠券</dt>
+                <dd>{{ order.coupon.name }}</dd>
+              </div>
             </dl>
             <div class="amounts__total">
               <span>应付金额</span>

@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 
+from apps.coupons import selectors as coupon_selectors
 from apps.orders.models import Order
 from apps.payments.models import Payment
 
@@ -51,7 +52,11 @@ def _status_log_payload(log) -> dict:
 
 
 def order_queryset(*, user=None, params):
-    queryset = Order.objects.filter(is_deleted=False).prefetch_related("items__sku")
+    queryset = (
+        Order.objects.filter(is_deleted=False)
+        .select_related("user_coupon__coupon")
+        .prefetch_related("items__sku")
+    )
     if user is not None:
         queryset = queryset.filter(user=user)
 
@@ -98,6 +103,7 @@ def order_detail(order: Order, *, include_user: bool = False) -> dict:
         {
             "discount_amount": _money(order.discount_amount),
             "shipping_amount": _money(order.shipping_amount),
+            "coupon": coupon_selectors.order_coupon_payload(order),
             "address": order.address_snapshot,
             "remark": order.remark,
             "tracking_no": order.tracking_no,

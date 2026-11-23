@@ -72,12 +72,16 @@ watch(
             <el-dropdown-menu>
               <el-dropdown-item command="/user/profile">个人资料</el-dropdown-item>
               <el-dropdown-item command="/user/orders">我的订单</el-dropdown-item>
+              <el-dropdown-item command="/user/coupons">我的优惠券</el-dropdown-item>
               <el-dropdown-item command="/user/addresses">收货地址</el-dropdown-item>
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/products" divided>
                 商品后台
               </el-dropdown-item>
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/cms">
                 内容后台
+              </el-dropdown-item>
+              <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/coupons">
+                优惠券后台
               </el-dropdown-item>
               <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
             </el-dropdown-menu>

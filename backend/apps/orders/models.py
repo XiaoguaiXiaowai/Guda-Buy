@@ -38,6 +38,14 @@ class Order(BaseModel):
         "运费", max_digits=12, decimal_places=2, default=Decimal("0.00")
     )
     payable_amount = models.DecimalField("应付金额", max_digits=12, decimal_places=2)
+    user_coupon = models.ForeignKey(
+        "coupons.UserCoupon",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="used_orders",
+        verbose_name="使用的优惠券",
+    )
 
     # 收货信息快照不可变；address_public_id 仅用于地址删除引用检查
     address_snapshot = models.JSONField("收货信息快照", default=dict)

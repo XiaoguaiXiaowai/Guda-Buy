@@ -46,7 +46,7 @@ def _idempotency_key(request) -> str:
 
 
 def _fetch_order(order_no: str, *, user=None) -> Order:
-    queryset = Order.objects.select_related("user").prefetch_related(
+    queryset = Order.objects.select_related("user", "user_coupon__coupon").prefetch_related(
         "items__sku", "payments", "status_logs"
     )
     if user is not None:
@@ -76,6 +76,7 @@ class OrderPreviewView(APIView):
             request.user,
             cart_item_public_ids=serializer.validated_data["cart_item_public_ids"],
             address_public_id=serializer.validated_data["address_public_id"],
+            user_coupon_public_id=serializer.validated_data.get("user_coupon_public_id", ""),
         )
         return Response(payload)
 
@@ -116,6 +117,7 @@ class OrderListCreateView(generics.GenericAPIView):
             address_public_id=serializer.validated_data["address_public_id"],
             remark=serializer.validated_data.get("remark", ""),
             idempotency_key=_idempotency_key(request),
+            user_coupon_public_id=serializer.validated_data.get("user_coupon_public_id", ""),
         )
         order = _fetch_order(order.order_no, user=request.user)
         payload = selectors.order_detail(order)

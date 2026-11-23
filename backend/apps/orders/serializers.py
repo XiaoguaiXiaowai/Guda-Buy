@@ -2,6 +2,8 @@
 
 from rest_framework import serializers
 
+from apps.coupons.serializers import CouponEvaluationSerializer, OrderCouponSerializer
+
 
 # ---------------------------------------------------------------------------
 # 入参
@@ -14,6 +16,13 @@ class OrderPreviewRequestSerializer(serializers.Serializer):
         help_text="本次结算的购物车项 public_id 列表",
     )
     address_public_id = serializers.CharField(max_length=32)
+    user_coupon_public_id = serializers.CharField(
+        max_length=32,
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="选择使用的用户优惠券 public_id，可不传",
+    )
 
 
 class OrderCreateRequestSerializer(OrderPreviewRequestSerializer):
@@ -61,6 +70,8 @@ class OrderPreviewSerializer(serializers.Serializer):
     shipping_amount = serializers.CharField()
     payable_amount = serializers.CharField()
     free_shipping_threshold = serializers.CharField()
+    coupons = CouponEvaluationSerializer(many=True)
+    coupon = CouponEvaluationSerializer(allow_null=True)
 
 
 class OrderItemSerializer(serializers.Serializer):
@@ -118,6 +129,7 @@ class OrderBriefSerializer(serializers.Serializer):
 class OrderDetailSerializer(OrderBriefSerializer):
     discount_amount = serializers.CharField()
     shipping_amount = serializers.CharField()
+    coupon = OrderCouponSerializer(allow_null=True)
     address = OrderAddressSerializer()
     remark = serializers.CharField(allow_blank=True)
     tracking_no = serializers.CharField(allow_blank=True)
