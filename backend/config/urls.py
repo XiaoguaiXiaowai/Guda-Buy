@@ -30,6 +30,7 @@ urlpatterns += [
     path("api/v1/", include("apps.coupons.urls")),
     path("api/v1/", include("apps.notifications.urls")),
     path("api/v1/", include("apps.reviews.urls")),
+    path("api/v1/", include("apps.support.urls")),
 ]
 
 handler404 = "apps.common.exceptions.not_found_handler"

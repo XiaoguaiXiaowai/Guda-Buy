@@ -75,6 +75,7 @@ watch(
               :max="99"
             />
           </RouterLink>
+          <RouterLink to="/support">客服</RouterLink>
           <RouterLink to="/user/profile">我的</RouterLink>
         </nav>
 
@@ -97,6 +98,7 @@ watch(
               <el-dropdown-item command="/user/coupons">我的优惠券</el-dropdown-item>
               <el-dropdown-item command="/user/addresses">收货地址</el-dropdown-item>
               <el-dropdown-item command="/user/notifications">消息中心</el-dropdown-item>
+              <el-dropdown-item command="/support">在线客服</el-dropdown-item>
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/products" divided>
                 商品后台
               </el-dropdown-item>
@@ -108,6 +110,9 @@ watch(
               </el-dropdown-item>
               <el-dropdown-item v-if="auth.isCatalogStaff" command="/admin/reviews">
                 评价审核后台
+              </el-dropdown-item>
+              <el-dropdown-item v-if="auth.isSupportStaff" command="/admin/support">
+                客服工作台
               </el-dropdown-item>
               <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
             </el-dropdown-menu>

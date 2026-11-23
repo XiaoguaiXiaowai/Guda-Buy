@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { cancelOrder, confirmOrder, fetchOrderDetail } from '@/api/order'
+import { createConversation } from '@/api/support'
 import type { OrderDetail } from '@/types/order'
 import { resolveImageUrl } from '@/utils/catalog'
 import { formatCurrency, formatDateTime } from '@/utils/format'
@@ -17,6 +18,7 @@ const order = ref<OrderDetail | null>(null)
 const loading = ref(true)
 const failed = ref(false)
 const acting = ref(false)
+const contactingSupport = ref(false)
 
 const latestPayment = computed(() => order.value?.payments[0] ?? null)
 
@@ -38,6 +40,22 @@ async function pay(): Promise<void> {
     return
   }
   await router.push({ name: 'payment', params: { orderNo: order.value.order_no } })
+}
+
+async function contactSupport(): Promise<void> {
+  if (!order.value) {
+    return
+  }
+  contactingSupport.value = true
+  try {
+    const conversation = await createConversation({ order_no: order.value.order_no })
+    await router.push({
+      name: 'support',
+      query: { conversation: conversation.public_id },
+    })
+  } finally {
+    contactingSupport.value = false
+  }
 }
 
 async function cancel(): Promise<void> {
@@ -142,6 +160,7 @@ onMounted(() => {
           <el-button v-if="order.can_cancel" :loading="acting" @click="cancel">
             取消订单
           </el-button>
+          <el-button :loading="contactingSupport" @click="contactSupport">联系客服</el-button>
           <el-button v-if="order.can_pay" type="primary" @click="pay">去支付</el-button>
           <el-button
             v-if="order.can_confirm"

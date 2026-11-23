@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "apps.coupons",
     "apps.notifications",
     "apps.reviews",
+    "apps.support",
 ]
 
 MIDDLEWARE = [
@@ -147,6 +148,10 @@ CELERY_BEAT_SCHEDULE = {
     "coupons-expiring-remind": {
         "task": "coupons.tasks.remind_expiring_coupons",
         "schedule": 86400.0,
+    },
+    "support-close-inactive": {
+        "task": "support.tasks.close_inactive_conversations",
+        "schedule": 3600.0,
     },
 }
 
@@ -332,6 +337,10 @@ REVIEW_WINDOW_DAYS = env.int("REVIEW_WINDOW_DAYS", default=7)
 REVIEW_MAX_IMAGES = env.int("REVIEW_MAX_IMAGES", default=3)
 REVIEW_IMAGE_MAX_BYTES = env.int("REVIEW_IMAGE_MAX_BYTES", default=5 * 1024 * 1024)
 REVIEW_SENSITIVE_WORDS = env.list("REVIEW_SENSITIVE_WORDS", default=[])
+
+# 在线客服（架构文档 10.11）
+SUPPORT_AUTO_CLOSE_HOURS = env.int("SUPPORT_AUTO_CLOSE_HOURS", default=24)
+SUPPORT_BATCH_LIMIT = env.int("SUPPORT_BATCH_LIMIT", default=100)
 
 # CMS 内容运营（架构文档 10.9 / 3.6）
 CMS_HOME_CACHE_SECONDS = env.int("CMS_HOME_CACHE_SECONDS", default=300)

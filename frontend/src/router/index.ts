@@ -101,6 +101,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '收银台', requiresAuth: true },
   },
   {
+    path: '/support',
+    name: 'support',
+    component: () => import('@/views/front/SupportView.vue'),
+    meta: { title: '在线客服', requiresAuth: true },
+  },
+  {
     path: '/user',
     redirect: '/user/profile',
   },
@@ -181,6 +187,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '评价审核', requiresAuth: true, requiresCatalogAdmin: true },
   },
   {
+    path: '/admin/support',
+    name: 'admin-support',
+    component: () => import('@/views/admin/AdminSupportView.vue'),
+    meta: { title: '客服工作台', requiresAuth: true, requiresSupportStaff: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/front/NotFoundView.vue'),
@@ -209,6 +221,10 @@ router.beforeEach(async (to) => {
   }
 
   if ((to.meta.requiresCatalogAdmin || to.meta.requiresCmsAdmin) && !auth.isCatalogStaff) {
+    return { name: 'home' }
+  }
+
+  if (to.meta.requiresSupportStaff && !auth.isSupportStaff) {
     return { name: 'home' }
   }
 

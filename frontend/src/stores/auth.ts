@@ -20,6 +20,10 @@ export const useAuthStore = defineStore('auth', () => {
     const roles = user.value?.roles ?? []
     return roles.includes('admin') || roles.includes('operator')
   })
+  const isSupportStaff = computed(() => {
+    const roles = user.value?.roles ?? []
+    return roles.includes('admin') || roles.includes('support')
+  })
   let refreshPromise: Promise<boolean> | null = null
 
   function applySession(payload: AuthResponse) {
@@ -120,6 +124,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     isAuthenticated,
     isCatalogStaff,
+    isSupportStaff,
     ensureSession,
     restoreOnBoot,
     setProfile,
