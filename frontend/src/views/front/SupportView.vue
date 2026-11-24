@@ -148,15 +148,42 @@ function handleVisibilityChange(): void {
   }
 }
 
+async function refreshConversations(): Promise<void> {
+  if (!activeId.value) {
+    return
+  }
+  try {
+    const data = await fetchMyConversations()
+    const fresh = data.results.find((item) => item.public_id === activeId.value)
+    if (!fresh) {
+      return
+    }
+    const index = conversations.value.findIndex((item) => item.public_id === activeId.value)
+    if (index >= 0) {
+      conversations.value.splice(index, 1, fresh)
+    }
+  } catch {
+    // 轮询失败保持当前会话内容
+  }
+}
+
 function startPolling(): void {
   stopPolling()
   if (!activeId.value || isClosed.value) {
     return
   }
   pollTimer = window.setInterval(() => {
-    if (document.visibilityState === 'visible') {
-      void loadMessages()
+    if (document.visibilityState !== 'visible') {
+      return
     }
+    void (async () => {
+      await refreshConversations()
+      if (isClosed.value) {
+        stopPolling()
+        return
+      }
+      await loadMessages()
+    })()
   }, POLL_INTERVAL_MS)
   document.addEventListener('visibilitychange', handleVisibilityChange)
 }

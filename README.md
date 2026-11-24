@@ -2,7 +2,7 @@
 
 GUDA 商城演示项目。技术栈：Django 5.2 + DRF + MariaDB + Redis + Celery；Vue 3 + Vite + TypeScript + Pinia + Element Plus。
 
-当前进度：迭代 I8 通知与用户中心已验收（VERIFIED，2026-11-23，待人工复核），下一步进入 I9 用户评价。I1～I7 均已关闭。
+当前进度：迭代 I11 上线加固已完成验收（有条件通过，2026-11-23，待人工复核），I1～I10 均已关闭。上线前待生产联调探活告警，并复核 Nginx/Systemd 发布与媒体恢复。详见 `docs/交接文档-I11验收与上线评审.md`。
 
 I1 已交付：
 

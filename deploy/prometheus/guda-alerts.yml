@@ -1,0 +1,112 @@
+# Guda 商城告警规则（迭代计划 T11.6）
+#
+# 加载方式：prometheus.yml 中 rule_files: [ "/etc/prometheus/rules/guda-alerts.yml" ]
+# 依赖的采集任务（job 名按实际部署调整）：
+#   guda-healthz  blackbox_exporter 探活 https://guda.example.com/healthz/
+#   guda-node     node_exporter     磁盘使用率
+#   guda-mysql    mysqld_exporter   mysql_up
+#   guda-redis    redis_exporter    redis_up
+#   guda-nginx    nginx-prometheus-exporter  nginx_http_requests_total（包含 status 标签）
+# 送达：Alertmanager group_wait=30s、group_interval=1m、repeat_interval=4h；
+#       severity=critical 走电话/IM，severity=warning 走群消息。5 分钟内可触达。
+groups:
+  - name: guda-availability
+    rules:
+      - alert: GudaProbeMissing
+        expr: absent(probe_success{job="guda-healthz"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Guda 外部探活数据缺失"
+          description: "连续 5 分钟没有 guda-healthz 探活指标，检查 blackbox_exporter 与 Prometheus 抓取目标。"
+
+      - alert: GudaHealthzProbeFailed
+        expr: probe_success{job="guda-healthz"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Guda /healthz 探活失败（{{ $labels.instance }}）"
+          description: "连续 1 分钟探活失败：Web 进程退出或网络不可达。先执行 deploy/scripts/health-probe.sh 获取 request_id，再检索 app.log/error.log。"
+
+      - alert: GudaHealthzDependencyFailed
+        expr: probe_http_status_code{job="guda-healthz"} == 503
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Guda 依赖不可用（healthz 503）"
+          description: "按 /healthz/ 返回体 detail.db/detail.redis 判断故障依赖，处置见 docs/运维手册.md 第 7 节。"
+
+      - alert: GudaMysqlDown
+        expr: mysql_up{job="guda-mysql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MariaDB 不可用（{{ $labels.instance }}）"
+          description: "检查数据库进程、连接数与磁盘；恢复后确认 /healthz/ 返回 200。"
+
+      - alert: GudaRedisDown
+        expr: redis_up{job="guda-redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis 不可用（{{ $labels.instance }}）"
+          description: "Redis 宕机会导致 healthz 503 与队列积压；恢复后检查 Celery 队列消费情况。"
+
+  - name: guda-capacity
+    rules:
+      - alert: GudaDiskUsageHigh
+        expr: |
+          (
+            node_filesystem_size_bytes{job="guda-node",fstype!~"tmpfs|overlay|squashfs"}
+            - node_filesystem_avail_bytes{job="guda-node",fstype!~"tmpfs|overlay|squashfs"}
+          )
+          / node_filesystem_size_bytes{job="guda-node",fstype!~"tmpfs|overlay|squashfs"} > 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "磁盘使用率超过 80%（{{ $labels.instance }} {{ $labels.mountpoint }}）"
+          description: "清理日志/备份或扩容；确认 logrotate 与备份保留策略生效。"
+
+      - alert: GudaDiskUsageCritical
+        expr: |
+          (
+            node_filesystem_size_bytes{job="guda-node",fstype!~"tmpfs|overlay|squashfs"}
+            - node_filesystem_avail_bytes{job="guda-node",fstype!~"tmpfs|overlay|squashfs"}
+          )
+          / node_filesystem_size_bytes{job="guda-node",fstype!~"tmpfs|overlay|squashfs"} > 0.9
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "磁盘使用率超过 90%（{{ $labels.instance }} {{ $labels.mountpoint }}）"
+          description: "立即清理磁盘，避免数据库与日志写入失败导致 5xx。"
+
+  - name: guda-application
+    rules:
+      - alert: GudaHttp5xxRateHigh
+        expr: |
+          sum(rate(nginx_http_requests_total{job="guda-nginx",status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(nginx_http_requests_total{job="guda-nginx"}[5m])), 0.001)
+          > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "5xx 错误率超过 1%"
+          description: "按 error.log 的 request_id 聚合定位；若为新版本引入，按运维手册执行回滚。"
+
+      - alert: GudaHttp5xxBurst
+        expr: increase(nginx_http_requests_total{job="guda-nginx",status=~"5.."}[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "5 分钟内 5xx 超过 50 次"
+          description: "检查数据库连接、Redis 与最近发布记录；结合 request_id 定位具体接口。"

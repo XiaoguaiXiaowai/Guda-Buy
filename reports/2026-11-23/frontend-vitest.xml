@@ -1,127 +1,135 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="54" failures="0" errors="0" time="0.098163626">
-    <testsuite name="tests/auth.spec.ts" timestamp="2026-11-23T09:06:34.858Z" hostname="lijiadeMBP.lan" tests="5" failures="0" errors="0" skipped="0" time="0.008626875">
-        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 登录后仅把 access 放在内存，localStorage 只留会话提示" time="0.003717541">
+<testsuites name="vitest tests" tests="57" failures="0" errors="0" time="0.080597626">
+    <testsuite name="tests/auth.spec.ts" timestamp="2026-11-23T18:33:35.766Z" hostname="lijiadeMBP.lan" tests="5" failures="0" errors="0" skipped="0" time="0.006400208">
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 登录后仅把 access 放在内存，localStorage 只留会话提示" time="0.003204792">
         </testcase>
-        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 刷新页面后用 refresh Cookie 恢复会话" time="0.001847709">
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 刷新页面后用 refresh Cookie 恢复会话" time="0.001679084">
         </testcase>
-        <testcase classname="tests/auth.spec.ts" name="auth store &gt; refresh 失效时清除本地登录态且不保留会话提示" time="0.000482625">
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; refresh 失效时清除本地登录态且不保留会话提示" time="0.000386375">
         </testcase>
-        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 登出时清空用户与令牌" time="0.000285208">
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 登出时清空用户与令牌" time="0.00022275">
         </testcase>
-        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 无会话提示时不发起 refresh 请求" time="0.000241917">
-        </testcase>
-    </testsuite>
-    <testsuite name="tests/cart.spec.ts" timestamp="2026-11-23T09:06:34.860Z" hostname="lijiadeMBP.lan" tests="5" failures="0" errors="0" skipped="0" time="0.008212292">
-        <testcase classname="tests/cart.spec.ts" name="cartStatusTone / cartStatusLabel &gt; 按状态映射标签色与文案" time="0.001083416">
-        </testcase>
-        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 未登录时清零角标" time="0.002830542">
-        </testcase>
-        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 登录后刷新角标并计算 hasItems" time="0.000424291">
-        </testcase>
-        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 加购成功后同步刷新角标" time="0.001985292">
-        </testcase>
-        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 接口失败时清零" time="0.000798541">
+        <testcase classname="tests/auth.spec.ts" name="auth store &gt; 无会话提示时不发起 refresh 请求" time="0.000176209">
         </testcase>
     </testsuite>
-    <testsuite name="tests/catalog.spec.ts" timestamp="2026-11-23T09:06:34.860Z" hostname="lijiadeMBP.lan" tests="9" failures="0" errors="0" skipped="0" time="0.0226345">
-        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 相对路径补齐 /media 前缀" time="0.002915708">
+    <testsuite name="tests/cart.spec.ts" timestamp="2026-11-23T18:33:35.767Z" hostname="lijiadeMBP.lan" tests="5" failures="0" errors="0" skipped="0" time="0.004236542">
+        <testcase classname="tests/cart.spec.ts" name="cartStatusTone / cartStatusLabel &gt; 按状态映射标签色与文案" time="0.000709667">
         </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 绝对地址原样返回" time="0.000104792">
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 未登录时清零角标" time="0.001533791">
         </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 空值返回空字符串" time="0.000214916">
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 登录后刷新角标并计算 hasItems" time="0.000351375">
         </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 同价展示单价" time="0.017413208">
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 加购成功后同步刷新角标" time="0.000852875">
         </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 不同价展示起售价" time="0.000148042">
-        </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 未定价给出占位" time="0.000070958">
-        </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="stockTone &gt; 按库存状态映射标签色" time="0.000111792">
-        </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="productStatusLabel &gt; 返回中文状态" time="0.000076375">
-        </testcase>
-        <testcase classname="tests/catalog.spec.ts" name="toQueryParams &gt; 过滤空值与空字符串" time="0.000399167">
+        <testcase classname="tests/cart.spec.ts" name="useCartStore &gt; 接口失败时清零" time="0.000219625">
         </testcase>
     </testsuite>
-    <testsuite name="tests/cms.spec.ts" timestamp="2026-11-23T09:06:34.861Z" hostname="lijiadeMBP.lan" tests="10" failures="0" errors="0" skipped="0" time="0.003618458">
-        <testcase classname="tests/cms.spec.ts" name="cmsPageStatusLabel / tone &gt; 映射页面状态中文与标签色" time="0.000758042">
+    <testsuite name="tests/catalog.spec.ts" timestamp="2026-11-23T18:33:35.768Z" hostname="lijiadeMBP.lan" tests="9" failures="0" errors="0" skipped="0" time="0.019671542">
+        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 相对路径补齐 /media 前缀" time="0.001892291">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="sectionStatusLabel / position / level &gt; 映射栏目、位置与公告级别" time="0.000238166">
+        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 绝对地址原样返回" time="0.000198166">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 无起止时间为长期展示" time="0.000076541">
+        <testcase classname="tests/catalog.spec.ts" name="resolveImageUrl &gt; 空值返回空字符串" time="0.000219541">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 未到开始时间为未开始" time="0.000058334">
+        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 同价展示单价" time="0.015067166">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 处于窗口内为展示中" time="0.00004875">
+        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 不同价展示起售价" time="0.000134292">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 超过结束时间为已结束" time="0.000058833">
+        <testcase classname="tests/catalog.spec.ts" name="formatPriceRange &gt; 未定价给出占位" time="0.000070041">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 窗口文案与标签色保持一致" time="0.000154958">
+        <testcase classname="tests/catalog.spec.ts" name="stockTone &gt; 按库存状态映射标签色" time="0.000104125">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 接受小写字母、数字与中划线" time="0.000162791">
+        <testcase classname="tests/catalog.spec.ts" name="productStatusLabel &gt; 返回中文状态" time="0.000076583">
         </testcase>
-        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 拒绝中文、空格与首尾中划线" time="0.000117083">
-        </testcase>
-        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 大写会被归一化后接受" time="0.00005625">
+        <testcase classname="tests/catalog.spec.ts" name="toQueryParams &gt; 过滤空值与空字符串" time="0.000391583">
         </testcase>
     </testsuite>
-    <testsuite name="tests/coupon.spec.ts" timestamp="2026-11-23T09:06:34.863Z" hostname="lijiadeMBP.lan" tests="6" failures="0" errors="0" skipped="0" time="0.022606959">
-        <testcase classname="tests/coupon.spec.ts" name="couponValueLabel &gt; 展示满减面额" time="0.020329208">
+    <testsuite name="tests/cms.spec.ts" timestamp="2026-11-23T18:33:35.769Z" hostname="lijiadeMBP.lan" tests="10" failures="0" errors="0" skipped="0" time="0.002592042">
+        <testcase classname="tests/cms.spec.ts" name="cmsPageStatusLabel / tone &gt; 映射页面状态中文与标签色" time="0.000808209">
         </testcase>
-        <testcase classname="tests/coupon.spec.ts" name="couponValueLabel &gt; 把折扣率换算成折" time="0.000671834">
+        <testcase classname="tests/cms.spec.ts" name="sectionStatusLabel / position / level &gt; 映射栏目、位置与公告级别" time="0.000293333">
         </testcase>
-        <testcase classname="tests/coupon.spec.ts" name="couponValueLabel &gt; 免邮券表达为免运费" time="0.000096208">
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 无起止时间为长期展示" time="0.000091875">
         </testcase>
-        <testcase classname="tests/coupon.spec.ts" name="couponConditionLabel &gt; 零门槛显示无门槛" time="0.000092542">
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 未到开始时间为未开始" time="0.000055709">
         </testcase>
-        <testcase classname="tests/coupon.spec.ts" name="couponConditionLabel &gt; 有门槛显示满额可用" time="0.000113709">
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 处于窗口内为展示中" time="0.000046333">
         </testcase>
-        <testcase classname="tests/coupon.spec.ts" name="status tone &gt; 券模板与用户券状态映射到标签色" time="0.000151584">
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 超过结束时间为已结束" time="0.000061708">
         </testcase>
-    </testsuite>
-    <testsuite name="tests/format.spec.ts" timestamp="2026-11-23T09:06:34.864Z" hostname="lijiadeMBP.lan" tests="4" failures="0" errors="0" skipped="0" time="0.019488958">
-        <testcase classname="tests/format.spec.ts" name="formatCurrency &gt; 保留两位小数并添加千分位" time="0.015827417">
+        <testcase classname="tests/cms.spec.ts" name="bannerWindowState &gt; 窗口文案与标签色保持一致" time="0.000167625">
         </testcase>
-        <testcase classname="tests/format.spec.ts" name="formatCurrency &gt; 非法金额回退为 0.00" time="0.000104583">
+        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 接受小写字母、数字与中划线" time="0.000140416">
         </testcase>
-        <testcase classname="tests/format.spec.ts" name="formatDateTime &gt; 空值展示占位符" time="0.000106833">
+        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 拒绝中文、空格与首尾中划线" time="0.000114791">
         </testcase>
-        <testcase classname="tests/format.spec.ts" name="formatDateTime &gt; 有效时间可格式化" time="0.002761625">
+        <testcase classname="tests/cms.spec.ts" name="isValidCmsSlug &gt; 大写会被归一化后接受" time="0.000056834">
         </testcase>
     </testsuite>
-    <testsuite name="tests/notification.spec.ts" timestamp="2026-11-23T09:06:34.864Z" hostname="lijiadeMBP.lan" tests="11" failures="0" errors="0" skipped="0" time="0.011165042">
-        <testcase classname="tests/notification.spec.ts" name="notificationTypeTone / notificationTypeLabel &gt; 按类型映射标签色" time="0.001372375">
+    <testsuite name="tests/coupon.spec.ts" timestamp="2026-11-23T18:33:35.770Z" hostname="lijiadeMBP.lan" tests="6" failures="0" errors="0" skipped="0" time="0.01439">
+        <testcase classname="tests/coupon.spec.ts" name="couponValueLabel &gt; 展示满减面额" time="0.012438125">
         </testcase>
-        <testcase classname="tests/notification.spec.ts" name="notificationTypeTone / notificationTypeLabel &gt; 优先使用后端文案，缺失时回退本地映射" time="0.000259083">
+        <testcase classname="tests/coupon.spec.ts" name="couponValueLabel &gt; 把折扣率换算成折" time="0.000178542">
         </testcase>
-        <testcase classname="tests/notification.spec.ts" name="notificationTypeTone / notificationTypeLabel &gt; 筛选页签覆盖五种消息类型" time="0.000381833">
+        <testcase classname="tests/coupon.spec.ts" name="couponValueLabel &gt; 免邮券表达为免运费" time="0.000073709">
         </testcase>
-        <testcase classname="tests/notification.spec.ts" name="notificationTarget &gt; 订单消息跳订单详情" time="0.000142916">
+        <testcase classname="tests/coupon.spec.ts" name="couponConditionLabel &gt; 零门槛显示无门槛" time="0.000090584">
         </testcase>
-        <testcase classname="tests/notification.spec.ts" name="notificationTarget &gt; 优惠券消息跳我的优惠券" time="0.000070541">
+        <testcase classname="tests/coupon.spec.ts" name="couponConditionLabel &gt; 有门槛显示满额可用" time="0.000117791">
         </testcase>
-        <testcase classname="tests/notification.spec.ts" name="notificationTarget &gt; 系统消息不跳转" time="0.000377334">
-        </testcase>
-        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 未登录时未读数归零且不发请求" time="0.003568584">
-        </testcase>
-        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 登录后刷新未读数" time="0.000342792">
-        </testcase>
-        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 接口失败时保留上一次未读数" time="0.000224667">
-        </testcase>
-        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 未读数不会为负" time="0.00014525">
-        </testcase>
-        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 页面隐藏时轮询跳过请求，回到前台补拉" time="0.002318667">
+        <testcase classname="tests/coupon.spec.ts" name="status tone &gt; 券模板与用户券状态映射到标签色" time="0.000144417">
         </testcase>
     </testsuite>
-    <testsuite name="tests/review.spec.ts" timestamp="2026-11-23T09:06:34.866Z" hostname="lijiadeMBP.lan" tests="4" failures="0" errors="0" skipped="0" time="0.001810542">
-        <testcase classname="tests/review.spec.ts" name="评价状态映射 &gt; 优先使用后端文案，缺失时回退本地映射" time="0.000634959">
+    <testsuite name="tests/format.spec.ts" timestamp="2026-11-23T18:33:35.771Z" hostname="lijiadeMBP.lan" tests="4" failures="0" errors="0" skipped="0" time="0.021288166">
+        <testcase classname="tests/format.spec.ts" name="formatCurrency &gt; 保留两位小数并添加千分位" time="0.01398525">
         </testcase>
-        <testcase classname="tests/review.spec.ts" name="评价状态映射 &gt; 状态对应不同标签色" time="0.000199625">
+        <testcase classname="tests/format.spec.ts" name="formatCurrency &gt; 非法金额回退为 0.00" time="0.000102083">
         </testcase>
-        <testcase classname="tests/review.spec.ts" name="评分分布与图片配额 &gt; 按总数计算星级占比并四舍五入" time="0.000108667">
+        <testcase classname="tests/format.spec.ts" name="formatDateTime &gt; 空值展示占位符" time="0.000101708">
         </testcase>
-        <testcase classname="tests/review.spec.ts" name="评分分布与图片配额 &gt; 最多 3 张图片，剩余配额不为负" time="0.000201458">
+        <testcase classname="tests/format.spec.ts" name="formatDateTime &gt; 有效时间可格式化" time="0.005668292">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/notification.spec.ts" timestamp="2026-11-23T18:33:35.772Z" hostname="lijiadeMBP.lan" tests="11" failures="0" errors="0" skipped="0" time="0.00879325">
+        <testcase classname="tests/notification.spec.ts" name="notificationTypeTone / notificationTypeLabel &gt; 按类型映射标签色" time="0.000661125">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="notificationTypeTone / notificationTypeLabel &gt; 优先使用后端文案，缺失时回退本地映射" time="0.000093333">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="notificationTypeTone / notificationTypeLabel &gt; 筛选页签覆盖五种消息类型" time="0.000340375">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="notificationTarget &gt; 订单消息跳订单详情" time="0.000117916">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="notificationTarget &gt; 优惠券消息跳我的优惠券" time="0.000067292">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="notificationTarget &gt; 系统消息不跳转" time="0.0000725">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 未登录时未读数归零且不发请求" time="0.002234292">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 登录后刷新未读数" time="0.000909292">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 接口失败时保留上一次未读数" time="0.000857125">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 未读数不会为负" time="0.000168334">
+        </testcase>
+        <testcase classname="tests/notification.spec.ts" name="useNotificationStore &gt; 页面隐藏时轮询跳过请求，回到前台补拉" time="0.002579625">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/review.spec.ts" timestamp="2026-11-23T18:33:35.773Z" hostname="lijiadeMBP.lan" tests="4" failures="0" errors="0" skipped="0" time="0.001682459">
+        <testcase classname="tests/review.spec.ts" name="评价状态映射 &gt; 优先使用后端文案，缺失时回退本地映射" time="0.000734583">
+        </testcase>
+        <testcase classname="tests/review.spec.ts" name="评价状态映射 &gt; 状态对应不同标签色" time="0.000128667">
+        </testcase>
+        <testcase classname="tests/review.spec.ts" name="评分分布与图片配额 &gt; 按总数计算星级占比并四舍五入" time="0.000105334">
+        </testcase>
+        <testcase classname="tests/review.spec.ts" name="评分分布与图片配额 &gt; 最多 3 张图片，剩余配额不为负" time="0.000109917">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/support.spec.ts" timestamp="2026-11-23T18:33:35.773Z" hostname="lijiadeMBP.lan" tests="3" failures="0" errors="0" skipped="0" time="0.001543417">
+        <testcase classname="tests/support.spec.ts" name="客服会话状态映射 &gt; 优先使用后端文案，缺失时回退本地映射" time="0.000696417">
+        </testcase>
+        <testcase classname="tests/support.spec.ts" name="客服会话状态映射 &gt; 不同状态对应不同标签色" time="0.000128833">
+        </testcase>
+        <testcase classname="tests/support.spec.ts" name="客服消息角色映射 &gt; 系统消息显示为系统，会员视角显示为我" time="0.000101833">
         </testcase>
     </testsuite>
 </testsuites>

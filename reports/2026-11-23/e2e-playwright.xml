@@ -1,0 +1,34 @@
+<testsuites id="" name="" tests="8" failures="0" skipped="0" errors="0" time="33.754737999999996">
+<testsuite name="01-auth.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.236" errors="0">
+<testcase name="E2E-01 注册 → 登录 → 刷新页面仍保持登录" classname="01-auth.spec.ts" time="1.236">
+</testcase>
+</testsuite>
+<testsuite name="02-catalog-cart.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.163" errors="0">
+<testcase name="E2E-02 浏览分类商品 → 详情选 SKU → 加入购物车" classname="02-catalog-cart.spec.ts" time="1.163">
+</testcase>
+</testsuite>
+<testsuite name="03-checkout-coupon.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.132" errors="0">
+<testcase name="E2E-03 购物车改数量 → 勾选 → 结算 → 用券 → 提交订单" classname="03-checkout-coupon.spec.ts" time="1.132">
+</testcase>
+</testsuite>
+<testsuite name="04-payment-success.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.356" errors="0">
+<testcase name="E2E-04 模拟支付成功 → 订单已支付 → 消息通知" classname="04-payment-success.spec.ts" time="1.356">
+</testcase>
+</testsuite>
+<testsuite name="05-payment-failure-retry.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="0.948" errors="0">
+<testcase name="E2E-05 模拟支付失败 → 重新支付成功" classname="05-payment-failure-retry.spec.ts" time="0.948">
+</testcase>
+</testsuite>
+<testsuite name="06-cancel-order.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.164" errors="0">
+<testcase name="E2E-06 取消未支付订单 → 库存立即释放" classname="06-cancel-order.spec.ts" time="1.164">
+</testcase>
+</testsuite>
+<testsuite name="07-review-flow.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="3.749" errors="0">
+<testcase name="E2E-07 确认收货 → 提交评价 → 后台审核通过 → 前台展示" classname="07-review-flow.spec.ts" time="3.749">
+</testcase>
+</testsuite>
+<testsuite name="08-support-flow.spec.ts" timestamp="2026-11-23T18:35:46.896Z" hostname="chromium" tests="1" failures="0" skipped="0" time="11.098" errors="0">
+<testcase name="E2E-08 客服会话：发起咨询 → 后台接管 → 双向消息 → 关闭会话" classname="08-support-flow.spec.ts" time="11.098">
+</testcase>
+</testsuite>
+</testsuites>
